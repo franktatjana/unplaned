@@ -1,25 +1,25 @@
-# Unplanned
+# Unplaned
 
 > **Prototype. Local-first. No production guarantees.**
 
 ## What is this?
 
-**Unplanned** is a single-task AI focus tool for people who avoid, overthink, or drop important tasks. You enter a task, something you actually want to get done, and the tool helps you break it down, reconnect with why it matters, and stay with it long enough to finish.
+**Unplaned** is a single-task AI focus tool for people who avoid, overthink, or drop important tasks. You enter a task, something you actually want to get done, and the tool helps you break it down, reconnect with why it matters, and stay with it long enough to finish.
 
-Instead of juggling todo lists, Unplanned gives you one clear screen: your task, a checklist of subtasks, a countdown timer, and your reason for doing it.
+Instead of juggling todo lists, Unplaned gives you one clear screen: your task, a checklist of subtasks, a countdown timer, and your reason for doing it.
 
 ## Why does this exist?
 
 Most tools are built for planning not for doing. They assume you already know how to tackle the task, how long it'll take, and why you even started. But in practice, we stall, tasks get blurred, energy drops. The "why" gets buried under meetings, messages, options of implementation, and mental noise.
 
-Unplanned flips the flow: you act first and the structure catches up. It's not about tracking your week but about making **this one task** finishable, now.
+Unplaned flips the flow: you act first and the structure catches up. It's not about tracking your week but about making **this one task** finishable, now.
 
 ## How does it work?
 
 You type in a task:
 `Write client email about upcoming event`
 
-Unplanned:
+Unplaned:
 
 - Uses AI to break it down into 3–7 subtasks
 - Estimates how long it should take
@@ -41,7 +41,7 @@ You check off subtasks as you go. When time's up, you get a simple summary: what
 **"If it's worth starting, it's worth finishing."**
 **"Structure follows impulse."**
 
-Unplanned doesn't ask for your productivity philosophy. It just helps you get through the next 30-60 minutes with clarity, structure, and intention.
+Unplaned doesn't ask for your productivity philosophy. It just helps you get through the next 30-60 minutes with clarity, structure, and intention.
 
 ## How to Run
 

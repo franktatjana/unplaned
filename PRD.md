@@ -1,4 +1,4 @@
-# Product Requirements Document: Unplanned
+# Product Requirements Document: Unplaned
 
 **Version:** 1.0
 **Status:** Draft
@@ -9,7 +9,7 @@
 
 ### Vision
 
-Unplanned is the anti-productivity tool, a single-task AI focus application that helps people who avoid, overthink, or drop important tasks. While other tools optimize for planning and organization, Unplanned optimizes for **doing**.
+Unplaned is the anti-productivity tool, a single-task AI focus application that helps people who avoid, overthink, or drop important tasks. While other tools optimize for planning and organization, Unplaned optimizes for **doing**.
 
 ### Goals
 
@@ -44,7 +44,7 @@ Even "simple" tasks hide dozens of micro-steps that seem obvious but still consu
 
 These small administrative grains of sand accumulate. Each one feels trivial: "check recipients, check the attachment", but together they create massive friction, delay, and the nagging sense that the task is bigger than it looks. This is why a "quick email" takes 20 minutes and why we avoid starting in the first place.
 
-Unplanned makes the invisible visible. The AI breakdown surfaces these micro-steps so you can check them off instead of holding them in your head.
+Unplaned makes the invisible visible. The AI breakdown surfaces these micro-steps so you can check them off instead of holding them in your head.
 
 ### The Avoidance Pattern
 
@@ -59,7 +59,7 @@ When facing an ambiguous task, users typically:
 
 **Clarity creates momentum. Structure follows action.**
 
-Tasks feel heavy not because they're hard, but because we carry the weight of invisible steps in our heads. Unplanned externalizes that weight. Instead of planning → doing, it reverses the flow: **doing → structure**.
+Tasks feel heavy not because they're hard, but because we carry the weight of invisible steps in our heads. Unplaned externalizes that weight. Instead of planning → doing, it reverses the flow: **doing → structure**.
 
 ---
 
@@ -163,7 +163,7 @@ For edge cases: if the input is too vague ("Do work"), prompt for specificity. I
 
 ### Local AI with Ollama
 
-Unplanned is offline-first. The AI runs locally using Ollama, so no internet is required after initial setup. If Ollama isn't available, manual mode lets users write their own subtasks.
+Unplaned is offline-first. The AI runs locally using Ollama, so no internet is required after initial setup. If Ollama isn't available, manual mode lets users write their own subtasks.
 
 ### AI Behavior
 
@@ -273,7 +273,7 @@ Time in app (more time ≠ more productive), tasks created (lists are the enemy)
 
 **Focus@Will** provides ambient music for concentration. Great for the environment, but no task tracking. It helps you focus but doesn't help you know what to focus on.
 
-**Centered** is an AI coach for focus sessions. Sophisticated, but complex and subscription-based. Unplanned is simpler and works offline.
+**Centered** is an AI coach for focus sessions. Sophisticated, but complex and subscription-based. Unplaned is simpler and works offline.
 
 ### Indirect Competitors
 
@@ -283,11 +283,11 @@ Time in app (more time ≠ more productive), tasks created (lists are the enemy)
 
 **Pomodoro apps** have timers but no AI structure. You still need to break down the task yourself.
 
-**Bullet journaling** is simple but analog. Unplanned brings the same philosophy to digital with AI assistance.
+**Bullet journaling** is simple but analog. Unplaned brings the same philosophy to digital with AI assistance.
 
 ### Our Position
 
-Unplanned sits at the intersection of high structure (AI breakdown) and high focus (single-task mode). Forest has focus but no structure. Notion has structure but no focus. We do both.
+Unplaned sits at the intersection of high structure (AI breakdown) and high focus (single-task mode). Forest has focus but no structure. Notion has structure but no focus. We do both.
 
 ---
 
