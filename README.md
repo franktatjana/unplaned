@@ -2,6 +2,15 @@
 
 > **Prototype. Local-first. No production guarantees.**
 
+## Why “Unplaned”?
+
+In woodworking, unplaned wood is raw, it’s uneven, unfinished. You work with the grain, shape it, and apply a finish when it’s ready.
+
+Tasks often start the same way: they don’t arrive as clean plans, usually start as rough thoughts, half-formed intentions. When you try to force "done" too early, things stall, split.
+
+Unplaned is built for that stage: it helps you take a raw task, follow its natural flow, shape it into clear steps, and bring it to a finished state.
+
+
 ## What is this?
 
 **Unplaned** is a single-task AI focus tool for people who avoid, overthink, or drop important tasks. You enter a task, something you actually want to get done, and the tool helps you break it down, reconnect with why it matters, and stay with it long enough to finish.
