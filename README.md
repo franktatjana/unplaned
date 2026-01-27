@@ -34,7 +34,11 @@ You check off subtasks as you go. When time's up, you get a simple summary: what
 - **Single-task mode**: one screen, one task, no switching, no inboxes
 - **Timer**: 15–60 min countdown with visual progress
 - **Why reminder**: your purpose stays visible to keep you anchored
-- **Session summary**: reflect at the end, reuse what worked, trash what didn't
+- **Progress tracking**: see time estimates vs actual time per subtask
+- **Overview**: Kanban-style board (Backlog / In Progress / Done)
+- **Motivation personalities**: choose your style - Stoic, Coach, Drill, or Friend
+- **AI second opinion**: get anonymized external feedback (works offline too)
+- **Sample data**: try the app with pre-loaded example tasks
 
 ## The Mantra
 
@@ -60,7 +64,7 @@ ollama serve
 ollama pull llama3
 ```
 
-See [app/README.md](app/README.md) for detailed setup instructions.
+The app works fully offline. All data stays on your machine - no accounts, no cloud sync.
 
 ## Project Structure
 
@@ -69,10 +73,16 @@ unplaned/
 ├── README.md           # This file
 ├── PRD.md              # Product requirements
 ├── LICENSE
-└── app/                # Next.js web application
-    ├── app/            # App router pages
-    ├── data/           # JSON storage
-    └── public/
+└── app/                # Next.js 14 application
+    ├── app/
+    │   ├── page.tsx        # Home (task list)
+    │   ├── overview/       # Kanban view
+    │   ├── focus/          # Focus session
+    │   ├── help/           # How to use
+    │   ├── api/            # API routes
+    │   ├── components/     # React components
+    │   └── lib/            # Types, storage, actions
+    └── data/               # JSON storage (local-first)
 ```
 
 ## License
