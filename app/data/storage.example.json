@@ -1,0 +1,70 @@
+{
+  "tasks": [
+    {
+      "id": "sample-001",
+      "text": "Prepare weekly team standup presentation",
+      "why": "Your team is counting on you to lead this. Show them you've got this!",
+      "coreWhy": "Clear communication keeps the team aligned and productive.",
+      "subtasks": [
+        { "id": "st-sample-001-1", "text": "Review last week's action items and status (~5min)", "completed": false },
+        { "id": "st-sample-001-2", "text": "Gather updates from team members (~10min)", "completed": false },
+        { "id": "st-sample-001-3", "text": "Identify blockers and escalations (~5min)", "completed": false },
+        { "id": "st-sample-001-4", "text": "Draft agenda with key discussion points (~10min)", "completed": false },
+        { "id": "st-sample-001-5", "text": "Prepare any visuals or data needed (~15min)", "completed": false }
+      ],
+      "duration": 45,
+      "priority": "high",
+      "personality": "coach",
+      "tags": ["work", "meetings"],
+      "notes": [],
+      "createdAt": "2026-01-27T08:00:00.000Z"
+    },
+    {
+      "id": "sample-002",
+      "text": "Learn the basics of a new productivity tool",
+      "why": "Investing time to learn now saves hours later. You're building skills.",
+      "coreWhy": "Mastering tools improves efficiency and reduces frustration.",
+      "subtasks": [
+        { "id": "st-sample-002-1", "text": "Watch intro tutorial or read getting started guide (~15min)", "completed": true },
+        { "id": "st-sample-002-2", "text": "Set up account and configure preferences (~10min)", "completed": true },
+        { "id": "st-sample-002-3", "text": "Try the core features with a test project (~20min)", "completed": false },
+        { "id": "st-sample-002-4", "text": "Note down questions and look up answers (~10min)", "completed": false },
+        { "id": "st-sample-002-5", "text": "Create a cheat sheet of useful shortcuts (~5min)", "completed": false }
+      ],
+      "duration": 60,
+      "priority": "medium",
+      "personality": "friend",
+      "tags": ["learning", "tools"],
+      "notes": [],
+      "createdAt": "2026-01-27T09:00:00.000Z"
+    },
+    {
+      "id": "sample-003",
+      "text": "Clean and organize home office desk",
+      "why": "A clear space means a clear mind. Get it done.",
+      "coreWhy": "An organized workspace reduces distractions and boosts focus.",
+      "subtasks": [
+        { "id": "st-sample-003-1", "text": "Remove everything from desk surface (~5min)", "completed": false },
+        { "id": "st-sample-003-2", "text": "Wipe down desk and screen (~5min)", "completed": false },
+        { "id": "st-sample-003-3", "text": "Sort items into keep, toss, and relocate piles (~10min)", "completed": false },
+        { "id": "st-sample-003-4", "text": "Organize cables and chargers (~5min)", "completed": false },
+        { "id": "st-sample-003-5", "text": "Return only essential items to desk (~5min)", "completed": false }
+      ],
+      "duration": 30,
+      "priority": "low",
+      "personality": "drill",
+      "tags": ["home", "organization"],
+      "notes": [],
+      "createdAt": "2026-01-27T10:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "session-sample-001",
+      "taskId": "sample-002",
+      "startedAt": "2026-01-27T09:15:00.000Z",
+      "currentSubtaskIndex": 2,
+      "completedSubtasks": ["st-sample-002-1", "st-sample-002-2"]
+    }
+  ]
+}
