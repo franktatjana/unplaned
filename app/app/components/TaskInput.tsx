@@ -84,7 +84,8 @@ export default function TaskInput() {
           data.why || "Let's get this done.",
           data.coreWhy || "This task moves you forward.",
           data.duration || 15,
-          "coach"
+          "coach",
+          data.doneMeans || []
         );
 
         setInput("");
@@ -146,7 +147,8 @@ export default function TaskInput() {
         "You've got this.",
         "This needs to get done.",
         manualDuration,
-        "coach"
+        "coach",
+        []
       );
       setInput("");
       setShowManualMode(false);
@@ -176,12 +178,12 @@ export default function TaskInput() {
   const handleVoiceInput = () => {
     if (!speechSupported) return;
 
-    const SpeechRecognition = (window as unknown as { SpeechRecognition?: typeof window.SpeechRecognition; webkitSpeechRecognition?: typeof window.SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognitionAPI) return;
 
-    const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognitionAPI();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = "en-US";
@@ -190,7 +192,8 @@ export default function TaskInput() {
     recognition.onend = () => setIsListening(false);
     recognition.onerror = () => setIsListening(false);
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
     };

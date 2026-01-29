@@ -1,88 +1,101 @@
+/**
+ * Elaborate/Analyze API Route
+ *
+ * Analyzes an existing task breakdown and suggests improvements:
+ * - Time estimates for each step
+ * - CTA (Call to Action), Deliverable, and SoWhat for each step
+ * - Identifies complex steps (>45 min) that should become separate tasks
+ * - Suggests missing critical steps
+ * - Defines "done means" - ripple effects beyond core task
+ *
+ * Two-phase operation:
+ * 1. Clarification phase - Asks questions if task is vague
+ * 2. Analysis phase - Full step-by-step analysis
+ *
+ * @route POST /api/elaborate
+ */
+
 import { NextRequest, NextResponse } from "next/server";
+import { callOllama, extractJSON, tryParseJSON } from "../../lib/ollama";
+import { buildElaboratePrompt, buildClarificationPrompt } from "../../lib/prompts";
 
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
+// ============================================
+// Phase 1: Clarification Assessment
+// ============================================
 
+/**
+ * Determines if the task needs clarifying questions before analysis.
+ *
+ * Only asks questions when truly necessary:
+ * - Task is vague ("work on project" - which project?)
+ * - Key details missing that change the approach
+ * - Time/scope unclear
+ *
+ * @param task - The task description
+ * @param subtasks - Array of subtask texts
+ * @returns Object indicating if clarification needed and questions to ask
+ */
 async function assessNeedsClarification(task: string, subtasks: string[]): Promise<{
   needsClarification: boolean;
   questions: Array<{ question: string; why: string }>;
 }> {
+  // Format subtasks as numbered list for the prompt
   const subtasksList = subtasks.map((st, i) => `${i + 1}. ${st}`).join("\n");
+  const prompt = buildClarificationPrompt(task, subtasksList);
 
-  const assessPrompt = `You are a task coach. Assess if this task breakdown has enough context for proper analysis.
+  // Use low temperature for consistent yes/no decisions
+  const result = await callOllama(prompt, { temperature: 0.2, num_predict: 300 });
+  if (!result.ok) {
+    // If AI unavailable, skip clarification and proceed to analysis
+    return { needsClarification: false, questions: [] };
+  }
 
-Task: "${task}"
-Current steps:
-${subtasksList}
-
-CRITICAL: Ask questions ONLY if truly necessary. Most tasks are clear enough.
-
-Ask clarifying questions ONLY when:
-- The task is vague (e.g., "work on project" - WHICH project? What aspect?)
-- Key details are missing that change the approach (e.g., "fix bug" - what system? what symptom?)
-- Time/scope is unclear in a way that affects breakdown (e.g., "learn programming" - what language? what goal?)
-
-DO NOT ask questions if:
-- The task is reasonably clear
-- Steps already provide enough context
-- You're just being overly cautious
-
-Reply with ONLY this JSON:
-{
-  "needsClarification": true/false,
-  "questions": [
-    {"question": "Specific, digging question?", "why": "Brief reason this matters"}
-  ]
-}
-
-Rules:
-- Maximum 3 questions, but prefer fewer if possible
-- Questions must be specific and dig deep - not generic
-- Each question should unlock actionable insights
-- If task is clear enough, set needsClarification to false with empty questions array
-
-JSON response:`;
-
-  try {
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt: assessPrompt,
-        stream: false,
-        options: { temperature: 0.2, num_predict: 300 },
-      }),
-    });
-
-    if (!response.ok) {
-      return { needsClarification: false, questions: [] };
-    }
-
-    const data = await response.json();
-    const text = data.response || "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (parsed.needsClarification && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
-        return {
-          needsClarification: true,
-          questions: parsed.questions.slice(0, 3).filter((q: { question?: string }) => q.question),
-        };
-      }
-    }
-  } catch {
-    // Assessment failed, proceed without questions
+  const parsed = extractJSON(result.text);
+  if (parsed?.needsClarification && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+    return {
+      needsClarification: true,
+      // Limit to 3 questions max, filter out empty questions
+      questions: (parsed.questions as Array<{ question?: string; why?: string }>)
+        .slice(0, 3)
+        .filter((q) => q.question) as Array<{ question: string; why: string }>,
+    };
   }
 
   return { needsClarification: false, questions: [] };
 }
 
+// ============================================
+// Main Route Handler
+// ============================================
+
+/**
+ * POST /api/elaborate
+ *
+ * Request body:
+ * - task: string - The task description
+ * - subtasks: string[] - Array of subtask texts
+ * - additionalContext?: string - User-provided context (from clarification)
+ * - skipClarification?: boolean - Skip phase 1 and go straight to analysis
+ *
+ * Response (clarification phase):
+ * - phase: "clarification"
+ * - questions: Array<{question, why}>
+ * - parentTask: string
+ *
+ * Response (analysis phase):
+ * - newSubtasks: Array<{text, guidance?}> - Additional steps with pragmatic guidance
+ * - extractTasks: Array - Complex steps to extract as separate tasks
+ * - stepAnalysis: Array - Time/CTA/Deliverable/SoWhat/guidance per step
+ *   - guidance: string - Action-oriented advice (e.g., "Use this time to prioritize topics.")
+ * - doneMeans: string[] - Task completion criteria
+ * - explanation: string - Summary of key changes
+ * - parentTask: string
+ */
 export async function POST(request: NextRequest) {
   try {
     const { task, subtasks, additionalContext, skipClarification } = await request.json();
 
+    // Validate required fields
     if (!task || !subtasks) {
       return NextResponse.json(
         { error: "Task and subtasks are required" },
@@ -90,7 +103,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Phase 1: Check if we need clarifying questions (unless skipped or context already provided)
+    // ----------------------------------------
+    // Phase 1: Clarification (optional)
+    // ----------------------------------------
+    // Skip if: explicit skip flag, or user already provided context
     if (!skipClarification && !additionalContext) {
       const assessment = await assessNeedsClarification(task, subtasks);
       if (assessment.needsClarification && assessment.questions.length > 0) {
@@ -102,187 +118,161 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Phase 2: Full analysis (with optional additional context)
+    // ----------------------------------------
+    // Phase 2: Full Analysis
+    // ----------------------------------------
     const subtasksList = subtasks.map((st: string, i: number) => `${i + 1}. ${st}`).join("\n");
+
+    // Include user's additional context if provided (from clarification answers)
     const contextSection = additionalContext
       ? `\nADDITIONAL CONTEXT FROM USER:\n${additionalContext}\n`
       : "";
 
-    const prompt = `You are a task breakdown expert. Analyze this task and its current steps:
+    const prompt = buildElaboratePrompt(task, subtasksList, contextSection);
 
-Task: "${task}"
-Current steps:
-${subtasksList}
-${contextSection}
-ESTIMATE TIME for each step and analyze:
-1. What's a realistic time estimate for EACH step?
-2. Which steps are too complex and need breaking down (>45 minutes)?
-3. Are there critical missing steps?
+    // Use moderate temperature and high token limit for detailed analysis
+    // Needs 3000+ tokens to handle tasks with many steps + CTA/deliverable/soWhat/guidance per step
+    const result = await callOllama(prompt, { temperature: 0.3, num_predict: 3500 });
 
-Reply in this exact JSON format:
-{
-  "stepTimeEstimates": [
-    {"stepIndex": 1, "estimatedMinutes": 10},
-    {"stepIndex": 2, "estimatedMinutes": 15}
-  ],
-  "totalEstimatedMinutes": 90,
-  "complexSteps": [
-    {
-      "stepIndex": 4,
-      "estimatedMinutes": 60,
-      "taskName": "descriptive name if extracted",
-      "reason": "why this is complex",
-      "breakdownSteps": [
-        {"text": "subtask 1", "minutes": 15},
-        {"text": "subtask 2", "minutes": 20}
-      ]
-    }
-  ],
-  "missingSteps": [
-    {"text": "new step to add", "afterStepIndex": 2, "minutes": 10}
-  ],
-  "explanation": "Brief explanation"
-}
-
-CRITICAL RULES:
-1. TIME ESTIMATES ARE MANDATORY for EVERY step - estimate realistically:
-   - Quick tasks (5-10 min): simple emails, quick reviews, single updates
-   - Medium tasks (15-30 min): research, drafting, analysis
-   - Large tasks (30-60 min): deep work, complex analysis, creation
-
-2. Include "totalEstimatedMinutes" - sum of all step estimates
-
-3. NO DUPLICATE STEPS - each step must be unique. Check that:
-   - No step repeats another step's meaning
-   - No step covers the same work as another
-   - If steps are similar, they should be combined not listed separately
-
-4. complexSteps: only if a single step takes >45 minutes
-5. missingSteps: only add if truly critical and not redundant
-
-CRITICAL for breakdownSteps (when extracting complex steps):
-- These will become a NEW separate task, so they must be SELF-CONTAINED
-- DO NOT repeat steps already listed in the parent task above
-- Include ONLY the specific work needed for this extracted portion
-
-JSON response:`;
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.3,
-          num_predict: 500,
-        },
-      }),
-    });
-
-    if (!response.ok) {
+    if (!result.ok) {
+      console.error("Ollama request failed:", result.error);
       return NextResponse.json({
         newSubtasks: [],
         extractTasks: [],
-        stepTimeEstimates: [],
-        explanation: "Could not analyze - AI service unavailable",
+        stepAnalysis: [],
+        doneMeans: [],
+        explanation: result.error || "AI service error. Is Ollama running?",
         parentTask: task,
       });
     }
 
-    const data = await response.json();
-    const text = data.response || "";
+    // ----------------------------------------
+    // Parse AI Response
+    // ----------------------------------------
+    const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("No JSON found in response. Raw text:", result.text.substring(0, 200));
+      return NextResponse.json({
+        newSubtasks: [],
+        extractTasks: [],
+        stepAnalysis: [],
+        doneMeans: [],
+        explanation: "AI response was not in expected format. Try again.",
+        parentTask: task,
+      });
+    }
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = tryParseJSON(jsonMatch[0]) as Record<string, unknown> | null;
+    if (!parsed) {
+      console.error("JSON parse failed. Raw match:", jsonMatch[0].substring(0, 300));
+      return NextResponse.json({
+        newSubtasks: [],
+        extractTasks: [],
+        stepAnalysis: [],
+        doneMeans: [],
+        explanation: "AI returned malformed data. Try again.",
+        parentTask: task,
+      });
+    }
 
-        // Process complex steps based on time threshold (45 minutes)
-        const extractTasks: Array<{
-          stepIndex: number;
-          taskName: string;
-          reason: string;
-          suggestedSubtasks: string[];
-          estimatedMinutes: number;
-        }> = [];
-        const autoAddSubtasks: Array<{ text: string; minutes: number }> = [];
+    // ----------------------------------------
+    // Process Complex Steps
+    // ----------------------------------------
+    // Steps over 45 minutes should be extracted as separate tasks
+    // Steps under 45 minutes get their breakdown added inline
 
-        if (Array.isArray(parsed.complexSteps)) {
-          for (const cs of parsed.complexSteps) {
-            const totalMins = cs.estimatedMinutes ||
-              (Array.isArray(cs.breakdownSteps)
-                ? cs.breakdownSteps.reduce((sum: number, s: { minutes?: number }) => sum + (s.minutes || 10), 0)
-                : 30);
+    const extractTasks: Array<{
+      stepIndex: number;
+      taskName: string;
+      reason: string;
+      suggestedSubtasks: string[];
+      estimatedMinutes: number;
+    }> = [];
+    const autoAddSubtasks: Array<{ text: string; minutes: number; guidance?: string }> = [];
 
-            if (totalMins > 45) {
-              // Worth extracting as separate task
-              extractTasks.push({
-                stepIndex: cs.stepIndex,
-                taskName: cs.taskName || `Step ${cs.stepIndex} expanded`,
-                reason: `${cs.reason || "Complex step"} (~${totalMins} minutes)`,
-                suggestedSubtasks: Array.isArray(cs.breakdownSteps)
-                  ? cs.breakdownSteps.map((s: { text: string; minutes?: number }) =>
-                      `${s.text} (~${s.minutes || 10}min)`)
-                  : [],
-                estimatedMinutes: totalMins,
-              });
-            } else {
-              // Add breakdown steps inline instead of extracting
-              if (Array.isArray(cs.breakdownSteps)) {
-                for (const bs of cs.breakdownSteps) {
-                  autoAddSubtasks.push({
-                    text: bs.text || "",
-                    minutes: bs.minutes || 10,
-                  });
-                }
-              }
-            }
-          }
-        }
+    if (Array.isArray(parsed.complexSteps)) {
+      for (const cs of parsed.complexSteps as Array<{
+        stepIndex?: number;
+        estimatedMinutes?: number;
+        taskName?: string;
+        reason?: string;
+        breakdownSteps?: Array<{ text?: string; minutes?: number }>;
+      }>) {
+        // Calculate total time from breakdown steps if not provided
+        const totalMins = cs.estimatedMinutes ||
+          (Array.isArray(cs.breakdownSteps)
+            ? cs.breakdownSteps.reduce((sum: number, s) => sum + (s.minutes || 10), 0)
+            : 30);
 
-        // Also add any missing steps
-        if (Array.isArray(parsed.missingSteps)) {
-          for (const ms of parsed.missingSteps) {
-            if (ms.text) {
+        if (totalMins > 45) {
+          // Complex step - suggest extracting as separate task
+          extractTasks.push({
+            stepIndex: cs.stepIndex || 0,
+            taskName: cs.taskName || `Step ${cs.stepIndex} expanded`,
+            reason: `${cs.reason || "Complex step"} (~${totalMins} minutes)`,
+            suggestedSubtasks: Array.isArray(cs.breakdownSteps)
+              ? cs.breakdownSteps.map((s) => `${s.text || ""} (~${s.minutes || 10}min)`)
+              : [],
+            estimatedMinutes: totalMins,
+          });
+        } else {
+          // Simpler step - add breakdown steps inline
+          if (Array.isArray(cs.breakdownSteps)) {
+            for (const bs of cs.breakdownSteps) {
               autoAddSubtasks.push({
-                text: ms.text,
-                minutes: ms.minutes || 10,
+                text: bs.text || "",
+                minutes: bs.minutes || 10,
               });
             }
           }
         }
-
-        // Format auto-add subtasks with time estimates
-        const newSubtasks = autoAddSubtasks.map(s => `${s.text} (~${s.minutes}min)`);
-
-        return NextResponse.json({
-          newSubtasks,
-          extractTasks,
-          stepTimeEstimates: parsed.stepTimeEstimates || [],
-          explanation: parsed.explanation || "Analysis complete",
-          parentTask: task,
-        });
-      } catch {
-        // Parse failed
       }
     }
 
+    // ----------------------------------------
+    // Process Missing Steps
+    // ----------------------------------------
+    // Add any critical steps the AI identified as missing
+    if (Array.isArray(parsed.missingSteps)) {
+      for (const ms of parsed.missingSteps as Array<{ text?: string; minutes?: number; guidance?: string }>) {
+        if (ms.text) {
+          autoAddSubtasks.push({
+            text: ms.text,
+            minutes: ms.minutes || 10,
+            guidance: ms.guidance,
+          });
+        }
+      }
+    }
+
+    // Format new subtasks with time estimates and guidance
+    const newSubtasks = autoAddSubtasks.map(s => ({
+      text: `${s.text} (~${s.minutes}min)`,
+      guidance: s.guidance,
+    }));
+
+    // ----------------------------------------
+    // Return Analysis Results
+    // ----------------------------------------
     return NextResponse.json({
-      newSubtasks: [],
-      extractTasks: [],
-      stepTimeEstimates: [],
-      explanation: "Current breakdown looks complete. No additional steps needed.",
+      newSubtasks,           // Steps to add to the task
+      extractTasks,          // Complex steps to extract as separate tasks
+      stepAnalysis: parsed.stepAnalysis || parsed.stepTimeEstimates || [],  // Per-step analysis
+      doneMeans: Array.isArray(parsed.doneMeans)
+        ? (parsed.doneMeans as unknown[]).filter((d: unknown) => typeof d === "string")
+        : [],
+      explanation: (parsed.explanation as string) || "Analysis complete",
       parentTask: task,
     });
   } catch (error) {
     console.error("Elaborate error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({
       newSubtasks: [],
       extractTasks: [],
-      stepTimeEstimates: [],
-      explanation: "Could not analyze task",
+      stepAnalysis: [],
+      doneMeans: [],
+      explanation: `Analysis failed: ${message}. Is Ollama running?`,
     });
   }
 }

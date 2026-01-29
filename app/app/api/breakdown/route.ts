@@ -1,39 +1,60 @@
+/**
+ * Task Breakdown API Route
+ *
+ * The primary task creation endpoint. Takes a task description and
+ * uses AI to generate actionable subtasks with time estimates.
+ *
+ * Flow:
+ * 1. Polish the task text (fix grammar/spelling)
+ * 2. Generate subtasks using configured personality
+ * 3. Return structured breakdown with motivation
+ *
+ * May return "needs_clarification" status if the task is too vague
+ * for meaningful breakdown.
+ *
+ * @route POST /api/breakdown
+ *
+ * Request body:
+ * - task: string - The task description
+ * - personality: string - AI personality (stoic, coach, drill, friend)
+ *
+ * Response (success):
+ * - status: "success"
+ * - task: string - Polished task text
+ * - subtasks: Array<{text, cta?, deliverable?}> - Generated steps
+ * - doneMeans: string[] - Completion criteria
+ * - duration: 15 | 30 | 45 | 60 - Estimated minutes
+ * - coreWhy: string - Deeper motivation
+ * - why: string - Immediate motivation
+ *
+ * Response (clarification needed):
+ * - status: "needs_clarification"
+ * - clarificationQuestion: string - Question to ask user
+ * - task: string - The polished task
+ */
+
 import { NextRequest, NextResponse } from "next/server";
+import { callOllama, extractJSON } from "../../lib/ollama";
+import { getBreakdownPrompt, getBreakdownSystemPrompt, getPolishPrompt } from "../../lib/prompts";
 
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
-
+/**
+ * Cleans up task text before breakdown.
+ * Minimal changes to preserve user intent.
+ */
 async function polishText(text: string): Promise<string> {
-  try {
-    const prompt = `Fix any spelling and grammar errors in this task description. Keep it natural and concise. Only return the corrected text, nothing else.
+  const result = await callOllama(getPolishPrompt(text), {
+    temperature: 0.1,
+    num_predict: 100,
+  });
 
-Original: "${text}"
+  if (!result.ok) return text;
 
-Corrected:`;
+  let polished = result.text.trim();
+  polished = polished.replace(/^["']|["']$/g, "").trim();
 
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: { temperature: 0.1, num_predict: 100 },
-      }),
-    });
-
-    if (!response.ok) return text;
-
-    const data = await response.json();
-    let polished = (data.response || text).trim();
-    polished = polished.replace(/^["']|["']$/g, "").trim();
-
-    // Sanity check
-    if (!polished || polished.length > text.length * 2) return text;
-    return polished;
-  } catch {
-    return text;
-  }
+  // Sanity check
+  if (!polished || polished.length > text.length * 2) return text;
+  return polished;
 }
 
 export async function POST(request: NextRequest) {
@@ -47,96 +68,78 @@ export async function POST(request: NextRequest) {
     // Polish the task text first
     const polishedTask = await polishText(task);
 
-    const prompt = `Break down this task into 3-7 clear, actionable steps (use as many as needed).
-Task: "${polishedTask}"
-
-Rules:
-- Each step should be specific and completable in one sitting
-- Start each step with an action verb
-- Keep steps concise (under 10 words each)
-- Order steps logically
-- Include all necessary steps, don't artificially limit
-
-Reply with ONLY a JSON object in this exact format:
-{
-  "subtasks": ["step 1", "step 2", "step 3", ...],
-  "duration": 15,
-  "coreWhy": "one sentence explaining why this matters",
-  "why": "one short motivational sentence"
-}
-
-Duration should be 15, 30, 45, or 60 minutes total.
-JSON response:`;
-
-    console.log("Calling Ollama with model:", MODEL);
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.3,
-          num_predict: 300,
-        },
-      }),
-      signal: AbortSignal.timeout(30000), // 30 second timeout
+    const result = await callOllama(getBreakdownPrompt(polishedTask, personality), {
+      system: getBreakdownSystemPrompt(),
+      temperature: 0.3,
+      num_predict: 500,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Unknown error");
-      console.error("Ollama error response:", response.status, errorText);
+    if (!result.ok) {
+      console.error("Ollama error:", result.error);
       return NextResponse.json(
-        { error: "AI service unavailable", details: errorText },
+        { error: "AI service unavailable", details: result.error },
         { status: 503 }
       );
     }
 
-    const data = await response.json();
-    const text = data.response || "";
-
-    if (!text) {
+    if (!result.text) {
       console.error("Ollama returned empty response");
     }
 
-    console.log("Ollama raw response:", text);
+    const parsed = extractJSON(result.text);
+    if (parsed) {
+      // Handle needs_clarification status
+      if (parsed.status === "needs_clarification" && parsed.clarificationQuestion) {
+        return NextResponse.json({
+          status: "needs_clarification",
+          clarificationQuestion: parsed.clarificationQuestion,
+          task: polishedTask,
+        });
+      }
 
-    // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        console.log("Parsed JSON:", parsed);
+      // Handle subtasks - can be objects or strings
+      let subtasks: Array<{ text: string; cta?: string; deliverable?: string }> = [];
 
-        // Make sure we have valid subtasks (allow up to 7)
-        const subtasks = Array.isArray(parsed.subtasks) && parsed.subtasks.length > 0
-          ? parsed.subtasks.slice(0, 7).filter((s: unknown) => typeof s === "string" && s.trim())
-          : null;
+      if (Array.isArray(parsed.subtasks) && parsed.subtasks.length > 0) {
+        subtasks = (parsed.subtasks as unknown[]).slice(0, 7).map((s: unknown) => {
+          if (typeof s === "string" && s.trim()) {
+            return { text: s.trim() };
+          }
+          if (typeof s === "object" && s !== null && "text" in s) {
+            const obj = s as { text: string; cta?: string; deliverable?: string };
+            return {
+              text: obj.text,
+              ...(obj.cta && { cta: obj.cta }),
+              ...(obj.deliverable && { deliverable: obj.deliverable }),
+            };
+          }
+          return null;
+        }).filter(Boolean) as Array<{ text: string; cta?: string; deliverable?: string }>;
+      }
 
-        if (subtasks && subtasks.length > 0) {
-          return NextResponse.json({
-            task: polishedTask,
-            subtasks,
-            duration: [15, 30, 45, 60].includes(parsed.duration) ? parsed.duration : 15,
-            coreWhy: parsed.coreWhy || "This task moves you forward.",
-            why: parsed.why || "Let's get this done.",
-          });
-        }
-        // If subtasks empty/invalid, fall through to other methods
-      } catch (parseError) {
-        console.error("JSON parse error:", parseError);
-        // Parse failed, try to extract steps manually
+      if (subtasks.length > 0) {
+        return NextResponse.json({
+          status: "success",
+          task: polishedTask,
+          subtasks,
+          doneMeans: Array.isArray(parsed.doneMeans)
+            ? (parsed.doneMeans as unknown[]).filter((d: unknown) => typeof d === "string")
+            : [],
+          duration: [15, 30, 45, 60].includes(parsed.duration as number) ? parsed.duration : 15,
+          coreWhy: (parsed.coreWhy as string) || "This task moves you forward.",
+          why: (parsed.why as string) || "Let's get this done.",
+        });
       }
     }
 
     // Fallback: extract numbered steps
-    const steps = text.match(/\d+\.\s*([^\n]+)/g);
+    const steps = result.text.match(/\d+\.\s*([^\n]+)/g);
     if (steps && steps.length >= 2) {
       return NextResponse.json({
+        status: "success",
         task: polishedTask,
-        subtasks: steps.slice(0, 7).map((s: string) => s.replace(/^\d+\.\s*/, "").trim()),
+        subtasks: steps.slice(0, 7).map((s: string) => ({ text: s.replace(/^\d+\.\s*/, "").trim() })),
+        doneMeans: [],
         duration: 15,
         coreWhy: "This task needs to be done.",
         why: "One step at a time.",
@@ -144,8 +147,14 @@ JSON response:`;
     }
 
     return NextResponse.json({
+      status: "success",
       task: polishedTask,
-      subtasks: ["Plan the approach", "Do the main work", "Review and finish"],
+      subtasks: [
+        { text: "Plan the approach", cta: "Open notes", deliverable: "Clear plan" },
+        { text: "Do the main work", cta: "Start first action", deliverable: "Core task complete" },
+        { text: "Review and finish", cta: "Check your work", deliverable: "Task done" },
+      ],
+      doneMeans: [],
       duration: 15,
       coreWhy: "This task needs your attention.",
       why: "Start small, finish strong.",
