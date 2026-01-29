@@ -6,11 +6,11 @@
       "why": "Your team is counting on you to lead this. Show them you've got this!",
       "coreWhy": "Clear communication keeps the team aligned and productive.",
       "subtasks": [
-        { "id": "st-sample-001-1", "text": "Review last week's action items and status (~5min)", "completed": false },
-        { "id": "st-sample-001-2", "text": "Gather updates from team members (~10min)", "completed": false },
-        { "id": "st-sample-001-3", "text": "Identify blockers and escalations (~5min)", "completed": false },
-        { "id": "st-sample-001-4", "text": "Draft agenda with key discussion points (~10min)", "completed": false },
-        { "id": "st-sample-001-5", "text": "Prepare any visuals or data needed (~15min)", "completed": false }
+        { "id": "st-sample-001-1", "text": "Review last week's action items and status (~5min)", "cta": "Open notes", "deliverable": "Checklist updated", "soWhat": "No forgotten items", "completed": false },
+        { "id": "st-sample-001-2", "text": "Gather updates from team members (~10min)", "cta": "Ping Slack", "deliverable": "Status collected", "soWhat": "No surprises", "completed": false },
+        { "id": "st-sample-001-3", "text": "Identify blockers and escalations (~5min)", "cta": "Review tickets", "deliverable": "Blockers listed", "soWhat": "No hidden issues", "completed": false },
+        { "id": "st-sample-001-4", "text": "Draft agenda with key discussion points (~10min)", "cta": "Open doc", "deliverable": "Agenda ready", "soWhat": "No rambling", "completed": false },
+        { "id": "st-sample-001-5", "text": "Prepare any visuals or data needed (~15min)", "cta": "Open slides", "deliverable": "Visuals ready", "soWhat": "No blank screens", "completed": false }
       ],
       "duration": 45,
       "priority": "high",
@@ -21,50 +21,137 @@
     },
     {
       "id": "sample-002",
-      "text": "Learn the basics of a new productivity tool",
-      "why": "Investing time to learn now saves hours later. You're building skills.",
-      "coreWhy": "Mastering tools improves efficiency and reduces frustration.",
+      "text": "Draft client proposal for Q2 project",
+      "why": "This proposal could land a major deal. Give it your best shot.",
+      "coreWhy": "Clear proposals win clients and build trust.",
       "subtasks": [
-        { "id": "st-sample-002-1", "text": "Watch intro tutorial or read getting started guide (~15min)", "completed": true },
-        { "id": "st-sample-002-2", "text": "Set up account and configure preferences (~10min)", "completed": true },
-        { "id": "st-sample-002-3", "text": "Try the core features with a test project (~20min)", "completed": false },
-        { "id": "st-sample-002-4", "text": "Note down questions and look up answers (~10min)", "completed": false },
-        { "id": "st-sample-002-5", "text": "Create a cheat sheet of useful shortcuts (~5min)", "completed": false }
+        { "id": "st-sample-002-1", "text": "Review client requirements and past communications (~10min)", "cta": "Open emails", "deliverable": "Requirements noted", "soWhat": "No missed needs", "completed": false },
+        { "id": "st-sample-002-2", "text": "Outline scope, deliverables, and timeline (~15min)", "cta": "Open template", "deliverable": "Scope documented", "soWhat": "No scope creep", "completed": false },
+        { "id": "st-sample-002-3", "text": "Draft pricing and payment terms (~10min)", "cta": "Open pricing sheet", "deliverable": "Pricing ready", "soWhat": "No awkward talks", "completed": false },
+        { "id": "st-sample-002-4", "text": "Write executive summary and value proposition (~15min)", "cta": "Type first line", "deliverable": "Summary complete", "soWhat": "No confusion", "completed": false },
+        { "id": "st-sample-002-5", "text": "Review for clarity and send to manager (~10min)", "cta": "Proofread doc", "deliverable": "Draft sent", "soWhat": "No typos", "completed": false }
       ],
       "duration": 60,
-      "priority": "medium",
-      "personality": "friend",
-      "tags": ["learning", "tools"],
+      "priority": "high",
+      "personality": "coach",
+      "tags": ["work", "sales"],
       "notes": [],
       "createdAt": "2026-01-27T09:00:00.000Z"
     },
     {
       "id": "sample-003",
-      "text": "Clean and organize home office desk",
-      "why": "A clear space means a clear mind. Get it done.",
-      "coreWhy": "An organized workspace reduces distractions and boosts focus.",
+      "text": "Process inbox to zero",
+      "why": "Clear inbox, clear mind. You've got this.",
+      "coreWhy": "Staying on top of email prevents surprises and builds reliability.",
       "subtasks": [
-        { "id": "st-sample-003-1", "text": "Remove everything from desk surface (~5min)", "completed": false },
-        { "id": "st-sample-003-2", "text": "Wipe down desk and screen (~5min)", "completed": false },
-        { "id": "st-sample-003-3", "text": "Sort items into keep, toss, and relocate piles (~10min)", "completed": false },
-        { "id": "st-sample-003-4", "text": "Organize cables and chargers (~5min)", "completed": false },
-        { "id": "st-sample-003-5", "text": "Return only essential items to desk (~5min)", "completed": false }
+        { "id": "st-sample-003-1", "text": "Scan all unread emails and archive FYIs (~5min)", "cta": "Open inbox", "deliverable": "FYIs archived", "soWhat": "No clutter", "completed": false },
+        { "id": "st-sample-003-2", "text": "Reply to quick questions (under 2 min each) (~10min)", "cta": "Start replies", "deliverable": "Quick replies sent", "soWhat": "No waiting queue", "completed": false },
+        { "id": "st-sample-003-3", "text": "Flag emails needing longer responses (~5min)", "cta": "Star emails", "deliverable": "Flagged list done", "soWhat": "No dropped balls", "completed": false },
+        { "id": "st-sample-003-4", "text": "Create tasks for action items (~5min)", "cta": "Open task list", "deliverable": "Tasks created", "soWhat": "No forgotten items", "completed": false },
+        { "id": "st-sample-003-5", "text": "Unsubscribe from 3 unnecessary newsletters (~5min)", "cta": "Find unsubscribe", "deliverable": "3 unsubscribed", "soWhat": "Less future noise", "completed": false }
       ],
       "duration": 30,
-      "priority": "low",
+      "priority": "medium",
       "personality": "drill",
-      "tags": ["home", "organization"],
+      "tags": ["work", "email"],
       "notes": [],
       "createdAt": "2026-01-27T10:00:00.000Z"
+    },
+    {
+      "id": "sample-004",
+      "text": "Prepare for 1-on-1 with manager",
+      "why": "This is your time to be heard. Make it count.",
+      "coreWhy": "Regular check-ins keep you aligned and accelerate your growth.",
+      "subtasks": [
+        { "id": "st-sample-004-1", "text": "Review notes from last 1-on-1 and any open items (~5min)", "cta": "Open notes", "deliverable": "Past items listed", "soWhat": "No repeating topics", "completed": false },
+        { "id": "st-sample-004-2", "text": "List accomplishments since last meeting (~5min)", "cta": "Open calendar", "deliverable": "Wins documented", "soWhat": "Credit captured", "completed": false },
+        { "id": "st-sample-004-3", "text": "Identify blockers or challenges to discuss (~5min)", "cta": "Reflect quietly", "deliverable": "Blockers listed", "soWhat": "No silent struggle", "completed": false },
+        { "id": "st-sample-004-4", "text": "Prepare 1-2 questions about career/projects (~5min)", "cta": "Draft questions", "deliverable": "Questions ready", "soWhat": "No wasted time", "completed": false },
+        { "id": "st-sample-004-5", "text": "Note any feedback to share (~5min)", "cta": "Write feedback", "deliverable": "Feedback noted", "soWhat": "Voice heard", "completed": false }
+      ],
+      "duration": 30,
+      "priority": "medium",
+      "personality": "friend",
+      "tags": ["work", "career"],
+      "notes": [],
+      "createdAt": "2026-01-27T11:00:00.000Z"
+    },
+    {
+      "id": "sample-005",
+      "text": "Research competitor's new product launch",
+      "why": "Know thy enemy. This intel keeps you ahead.",
+      "coreWhy": "Competitive awareness shapes better strategy and positioning.",
+      "subtasks": [
+        { "id": "st-sample-005-1", "text": "Read their press release and product page (~10min)", "cta": "Open website", "deliverable": "Key points noted", "soWhat": "No blind spots", "completed": false },
+        { "id": "st-sample-005-2", "text": "Check social media and customer reactions (~10min)", "cta": "Open Twitter", "deliverable": "Sentiment captured", "soWhat": "No missed signals", "completed": false },
+        { "id": "st-sample-005-3", "text": "Compare features to our offering (~10min)", "cta": "Open comparison doc", "deliverable": "Gap analysis done", "soWhat": "No assumptions", "completed": false },
+        { "id": "st-sample-005-4", "text": "Note pricing and positioning differences (~5min)", "cta": "Check pricing page", "deliverable": "Pricing compared", "soWhat": "No guessing", "completed": false },
+        { "id": "st-sample-005-5", "text": "Summarize findings in 3-5 bullet points (~10min)", "cta": "Open doc", "deliverable": "Summary ready", "soWhat": "Shareable intel", "completed": false }
+      ],
+      "duration": 45,
+      "priority": "medium",
+      "personality": "stoic",
+      "tags": ["work", "research"],
+      "notes": [],
+      "createdAt": "2026-01-27T12:00:00.000Z"
+    },
+    {
+      "id": "sample-006",
+      "text": "Write monthly progress report",
+      "why": "Your work deserves visibility. Document your wins.",
+      "coreWhy": "Progress reports build credibility and track impact over time.",
+      "subtasks": [
+        { "id": "st-sample-006-1", "text": "Pull key metrics from dashboards (~10min)", "cta": "Open dashboard", "deliverable": "Metrics captured", "soWhat": "No missing data", "completed": false },
+        { "id": "st-sample-006-2", "text": "List completed projects and milestones (~10min)", "cta": "Review calendar", "deliverable": "Wins listed", "soWhat": "Credit captured", "completed": false },
+        { "id": "st-sample-006-3", "text": "Document challenges faced and how resolved (~10min)", "cta": "Reflect briefly", "deliverable": "Lessons noted", "soWhat": "No repeated mistakes", "completed": false },
+        { "id": "st-sample-006-4", "text": "Outline next month's priorities (~10min)", "cta": "Draft priorities", "deliverable": "Roadmap set", "soWhat": "Clear direction", "completed": false },
+        { "id": "st-sample-006-5", "text": "Format and proofread before sending (~5min)", "cta": "Review doc", "deliverable": "Report sent", "soWhat": "No typos", "completed": false }
+      ],
+      "duration": 45,
+      "priority": "medium",
+      "personality": "coach",
+      "tags": ["work", "reporting"],
+      "notes": [],
+      "createdAt": "2026-01-27T13:00:00.000Z"
+    },
+    {
+      "id": "sample-007",
+      "text": "Plan next week's priorities",
+      "why": "A plan today means less chaos tomorrow. Take control.",
+      "coreWhy": "Weekly planning ensures you work on what matters most.",
+      "subtasks": [
+        { "id": "st-sample-007-1", "text": "Review calendar for meetings and deadlines (~5min)", "cta": "Open calendar", "deliverable": "Conflicts spotted", "soWhat": "No double-booked", "completed": false },
+        { "id": "st-sample-007-2", "text": "List all pending tasks and commitments (~10min)", "cta": "Check all lists", "deliverable": "Full list ready", "soWhat": "Nothing missed", "completed": false },
+        { "id": "st-sample-007-3", "text": "Identify top 3 priorities for the week (~5min)", "cta": "Pick top 3", "deliverable": "Priorities set", "soWhat": "No scattered focus", "completed": false },
+        { "id": "st-sample-007-4", "text": "Block focus time for deep work (~5min)", "cta": "Create events", "deliverable": "Time blocked", "soWhat": "Protected time", "completed": false },
+        { "id": "st-sample-007-5", "text": "Set one personal goal for the week (~5min)", "cta": "Write goal", "deliverable": "Goal documented", "soWhat": "Balance kept", "completed": false }
+      ],
+      "duration": 30,
+      "priority": "high",
+      "personality": "stoic",
+      "tags": ["planning", "productivity"],
+      "notes": [],
+      "createdAt": "2026-01-27T14:00:00.000Z"
+    },
+    {
+      "id": "sample-008",
+      "text": "Review and update project documentation",
+      "why": "Good docs save future-you hours of confusion.",
+      "coreWhy": "Documentation is a gift to your team and future self.",
+      "subtasks": [
+        { "id": "st-sample-008-1", "text": "Audit existing docs for outdated info (~10min)", "cta": "Open docs folder", "deliverable": "Outdated flagged", "soWhat": "No misinformation", "completed": false },
+        { "id": "st-sample-008-2", "text": "Update setup/installation instructions (~10min)", "cta": "Edit README", "deliverable": "Setup updated", "soWhat": "No onboarding pain", "completed": false },
+        { "id": "st-sample-008-3", "text": "Add any missing API or feature docs (~15min)", "cta": "Write new section", "deliverable": "Gaps filled", "soWhat": "No guessing", "completed": false },
+        { "id": "st-sample-008-4", "text": "Fix broken links and formatting (~5min)", "cta": "Click all links", "deliverable": "Links working", "soWhat": "No dead ends", "completed": false },
+        { "id": "st-sample-008-5", "text": "Add changelog entry for recent changes (~5min)", "cta": "Open changelog", "deliverable": "Entry added", "soWhat": "History preserved", "completed": false }
+      ],
+      "duration": 45,
+      "priority": "low",
+      "personality": "friend",
+      "tags": ["work", "documentation"],
+      "notes": [],
+      "createdAt": "2026-01-27T15:00:00.000Z"
     }
   ],
-  "sessions": [
-    {
-      "id": "session-sample-001",
-      "taskId": "sample-002",
-      "startedAt": "2026-01-27T09:15:00.000Z",
-      "currentSubtaskIndex": 2,
-      "completedSubtasks": ["st-sample-002-1", "st-sample-002-2"]
-    }
-  ]
+  "sessions": []
 }

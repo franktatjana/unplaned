@@ -1,0 +1,596 @@
+/* Focus Page Styles */
+
+/* ============================================
+   Layout & Containers
+   ============================================ */
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 3rem 1rem 2rem 1rem;
+  background: var(--bg-primary);
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading {
+  font-size: 1rem;
+  color: var(--fg-muted);
+}
+
+/* ============================================
+   Error State
+   ============================================ */
+
+.errorContainer {
+  text-align: center;
+}
+
+.errorText {
+  font-size: 1rem;
+  color: #dc3545;
+  margin-bottom: 1.5rem;
+}
+
+.backBtn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-primary);
+  cursor: pointer;
+}
+
+/* ============================================
+   Task Title & Why Banner
+   ============================================ */
+
+.taskTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #FFFF00;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 60px rgba(255, 255, 0, 0.3);
+}
+
+.whyBanner {
+  width: 100%;
+  max-width: 90%;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.whyText {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+/* ============================================
+   Personality Selector
+   ============================================ */
+
+.personalityRow {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.personalityBtn {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.personalityActive {
+  opacity: 1;
+  border-color: rgba(255, 255, 0, 0.5);
+  background: rgba(255, 255, 0, 0.1);
+}
+
+/* ============================================
+   Timer
+   ============================================ */
+
+.timerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.timer {
+  font-size: 4rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--fg-primary);
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.timerPaused {
+  opacity: 0.5;
+}
+
+.timerDone {
+  color: #28a745;
+}
+
+.timerUrgent {
+  color: #ffc107;
+}
+
+.timerCritical {
+  color: #dc3545;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.timeUpMessage {
+  margin: 0;
+  font-size: 1rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.urgentMessage {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ffc107;
+  font-weight: 500;
+}
+
+/* ============================================
+   Progress Bar
+   ============================================ */
+
+.progressContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 5px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--fg-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+/* ============================================
+   Subtask List
+   ============================================ */
+
+.subtaskList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subtaskWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.subtaskItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.subtaskCompleted {
+  background: rgba(40, 167, 69, 0.1);
+  border-color: rgba(40, 167, 69, 0.3);
+}
+
+.subtaskActive {
+  background: rgba(255, 255, 0, 0.1);
+  border-color: rgba(255, 255, 0, 0.5);
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 0, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(255, 255, 0, 0.4); }
+}
+
+.subtaskOvertime {
+  background: rgba(220, 53, 69, 0.15);
+  border-color: rgba(220, 53, 69, 0.5);
+  animation: none;
+}
+
+/* ============================================
+   Subtask Checkbox & Text
+   ============================================ */
+
+.checkbox {
+  font-size: 1.1rem;
+  color: var(--fg-muted);
+  width: 1.25rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.checkboxActive {
+  color: #FFFF00;
+}
+
+.subtaskText {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--fg-primary);
+  line-height: 1.4;
+}
+
+.subtaskTextCompleted {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.subtaskTextActive {
+  color: #FFFF00;
+  font-weight: 500;
+}
+
+/* ============================================
+   Time Info
+   ============================================ */
+
+.timeInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.elapsedTime {
+  font-size: 0.75rem;
+  color: #FFFF00;
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.elapsedTimeOvertime {
+  color: #dc3545;
+}
+
+.subtaskTime {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.subtaskTimeActive {
+  color: #FFFF00;
+}
+
+/* ============================================
+   Progress Gauge
+   ============================================ */
+
+.gaugeContainer {
+  width: 100%;
+  height: 3px;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.gaugeFill {
+  height: 100%;
+  background: #FFFF00;
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.gaugeFillWarning {
+  background: #ffc107;
+}
+
+.gaugeFillOvertime {
+  background: #dc3545;
+  width: 100%;
+}
+
+/* ============================================
+   Active Hints (CTA, Deliverable, SoWhat)
+   ============================================ */
+
+.activeHints {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 2rem;
+  padding-right: 1rem;
+  opacity: 0.7;
+}
+
+.ctaHint {
+  font-size: 0.8rem;
+  color: #FFFF00;
+}
+
+.deliverableHint {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.soWhatHint {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.guidanceHint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.7);
+  font-style: italic;
+}
+
+/* ============================================
+   Completed Time Row
+   ============================================ */
+
+.completedTimeRow {
+  padding-left: 2rem;
+}
+
+.completedTimeLabel {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.overtimeLabel {
+  color: #dc3545;
+}
+
+/* ============================================
+   Hint
+   ============================================ */
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  opacity: 0.5;
+  margin: 0;
+  text-align: center;
+}
+
+/* ============================================
+   Controls
+   ============================================ */
+
+.controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.homeBtn {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.pauseBtn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.endBtn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-secondary);
+  cursor: pointer;
+}
+
+.doneBtn {
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--fg-primary);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg-primary);
+  cursor: pointer;
+}
+
+/* ============================================
+   Confirm Row
+   ============================================ */
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.confirmText {
+  font-size: 0.95rem;
+  color: var(--fg-secondary);
+}
+
+.confirmYes {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: #dc3545;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.confirmNo {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: 6px;
+  color: var(--fg-secondary);
+  cursor: pointer;
+}
+
+/* ============================================
+   Template Prompt
+   ============================================ */
+
+.templatePrompt {
+  width: 100%;
+  max-width: 90%;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 0, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 0, 0.2);
+  text-align: center;
+}
+
+.templateQuestion {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.templateReason {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.templateAsk {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.templateActions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.templateSaveBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(255, 255, 0, 0.9);
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  cursor: pointer;
+}
+
+.templateDismissBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+.templateSaved {
+  width: 100%;
+  max-width: 90%;
+  padding: 0.75rem 1rem;
+  background: rgba(40, 167, 69, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(40, 167, 69, 0.9);
+}
+
+.bragImpact {
+  margin: 0.5rem 0 0.75rem 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+.bragSavedNote {
+  font-size: 0.8rem;
+  color: rgba(40, 167, 69, 0.9);
+  font-style: italic;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.bragSavedNote:hover {
+  color: #28a745;
+  text-decoration: underline;
+}

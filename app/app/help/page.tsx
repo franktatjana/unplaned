@@ -143,16 +143,74 @@ export default function HelpPage() {
           <ul style={styles.list}>
             <li><strong>Task breakdown</strong> - Automatically splits your task into steps</li>
             <li><strong>Time estimates</strong> - Realistic estimates for each step</li>
-            <li><strong>Analysis</strong> - Click &quot;Analyze&quot; to get suggestions</li>
+            <li><strong>Analysis</strong> - Click &quot;Analyze&quot; to enrich steps with CTA, deliverable, and soWhat</li>
             <li><strong>Second opinion</strong> - Get external AI feedback (anonymized)</li>
           </ul>
         </div>
 
         <div style={styles.feature}>
-          <h3 style={styles.featureTitle}>Overview Page</h3>
+          <h3 style={styles.featureTitle}>Step Details</h3>
+          <p style={styles.featureDesc}>
+            Each step can have rich context to help you execute:
+          </p>
+          <ul style={styles.list}>
+            <li><strong>▸ CTA</strong> - The immediate action to START (e.g., &quot;Open Gmail&quot;, &quot;Call client&quot;)</li>
+            <li><strong>✔ Deliverable</strong> - Tangible proof you&apos;re done (e.g., &quot;Email in outbox&quot;, &quot;3 bullet points&quot;)</li>
+            <li><strong>★ SoWhat</strong> - Pain avoided by completing (e.g., &quot;No last-minute scramble&quot;)</li>
+          </ul>
+          <p style={{...styles.featureDesc, marginTop: "0.75rem"}}>
+            Use &quot;Analyze&quot; on any task to auto-generate these for each step.
+          </p>
+        </div>
+
+        <div style={styles.feature}>
+          <h3 style={styles.featureTitle}>Definition of Done</h3>
+          <p style={styles.featureDesc}>
+            Tasks can have &quot;doneMeans&quot; - the ripple effects beyond the core work:
+          </p>
+          <ul style={styles.list}>
+            <li>Notify someone (e.g., &quot;Manager notified&quot;)</li>
+            <li>Update a system (e.g., &quot;Logged in Salesforce&quot;)</li>
+            <li>Send follow-up (e.g., &quot;Confirmation email sent&quot;)</li>
+          </ul>
+        </div>
+
+        <div style={styles.feature}>
+          <h3 style={styles.featureTitle}>Task Kanban</h3>
           <p style={styles.featureDesc}>
             See all your tasks organized in three columns: Backlog, In Progress, and Done.
             Great for getting a bird&apos;s eye view without losing focus.
+          </p>
+        </div>
+
+        <div style={styles.feature}>
+          <h3 style={styles.featureTitle}>Template Library</h3>
+          <p style={styles.featureDesc}>
+            Save any task as a reusable template:
+          </p>
+          <ul style={styles.list}>
+            <li>Click the menu on any task card and select &quot;Save as Template&quot;</li>
+            <li>Templates preserve steps, time estimates, CTAs, and deliverables</li>
+            <li>Access templates from the &quot;Template Library&quot; button on the home page</li>
+            <li>Click &quot;Use Template&quot; to create a new task from any template</li>
+          </ul>
+        </div>
+
+        <div style={styles.feature}>
+          <h3 style={styles.featureTitle}>Brag List (Performance Reviews)</h3>
+          <p style={styles.featureDesc}>
+            Turn completed tasks into professional achievement statements for performance reviews:
+          </p>
+          <ul style={styles.list}>
+            <li><strong>Value statements</strong> - Each completed task shows an AI-generated impact statement</li>
+            <li><strong>Accept &amp; Save</strong> - Click &quot;Accept&quot; to save a statement, &quot;Regenerate&quot; for different phrasing</li>
+            <li><strong>Brag List page</strong> - Generate a full achievement summary from all completed tasks</li>
+            <li><strong>Category tags</strong> - Entries are tagged (DELIVERY, PLANNING, COMMUNICATION, etc.)</li>
+            <li><strong>Overall impact</strong> - Each entry includes a summary of cumulative value</li>
+            <li><strong>Credibility focus</strong> - No fluff, only verifiable claims about what you controlled</li>
+          </ul>
+          <p style={{...styles.featureDesc, marginTop: "0.75rem"}}>
+            Access the Brag List from the navigation on the home page. Saved brags are stored in <code style={{background: "var(--bg-tertiary)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8rem"}}>data/brag-list.md</code> and can be deleted anytime.
           </p>
         </div>
 

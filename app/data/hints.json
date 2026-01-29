@@ -1,0 +1,52 @@
+{
+  "hints": [
+    {
+      "text": "Analyze uses AI to estimate time, suggest steps, and identify what's done.",
+      "action": "analyze"
+    },
+    {
+      "text": "2nd opinion sends your task (anonymized) to ChatGPT, Gemini, or Perplexity for review.",
+      "action": "2nd-opinion"
+    },
+    {
+      "text": "Double-click any step to edit it inline.",
+      "action": "edit"
+    },
+    {
+      "text": "Drag steps to reorder them.",
+      "action": "reorder"
+    },
+    {
+      "text": "AI can suggest extracting complex steps into separate tasks.",
+      "action": "extract"
+    },
+    {
+      "text": "Your data stays local — only 2nd opinion sends anonymized data externally.",
+      "action": "privacy"
+    },
+    {
+      "text": "Toggle individual AI suggestions on/off before applying changes.",
+      "action": "review"
+    },
+    {
+      "text": "Focus mode shows CTA, deliverable, and guidance hints for each active step.",
+      "action": "focus-hints"
+    },
+    {
+      "text": "Completed tasks generate credible brag entries for performance reviews.",
+      "action": "brag"
+    },
+    {
+      "text": "Accept a brag to save it — regenerate anytime for a different phrasing.",
+      "action": "brag-accept"
+    },
+    {
+      "text": "Saved brags appear in the Brag List page for easy copy during reviews.",
+      "action": "brag-list"
+    },
+    {
+      "text": "Save good task breakdowns as templates for future reuse.",
+      "action": "templates"
+    }
+  ]
+}

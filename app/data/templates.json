@@ -1,0 +1,150 @@
+{
+  "templates": [
+    {
+      "id": "a6bf8453-c7ef-4cc3-9144-e2c1009b4559",
+      "name": "Prepare weekly team standup presentation",
+      "why": "Your team is counting on you to lead this. Show them you've got this!",
+      "coreWhy": "Clear communication keeps the team aligned and productive.",
+      "doneMeans": [
+        "Deck shared with team",
+        "Calendar invite sent"
+      ],
+      "subtasks": [
+        {
+          "text": "Review last week's action items and status (~5min)",
+          "cta": "Open last week's notes",
+          "deliverable": "Checklist with status marks"
+        },
+        {
+          "text": "Gather updates from team members (~10min)",
+          "cta": "Check Slack channels",
+          "deliverable": "Bullet list of updates"
+        },
+        {
+          "text": "Identify blockers and escalations (~5min)",
+          "cta": "Review updates for issues",
+          "deliverable": "Blocker list with owners"
+        },
+        {
+          "text": "Draft agenda with key discussion points (~10min)",
+          "cta": "Open presentation template",
+          "deliverable": "Agenda slide filled in"
+        },
+        {
+          "text": "Prepare any visuals or data needed (~15min)",
+          "cta": "Open data sources",
+          "deliverable": "Charts added to deck"
+        }
+      ],
+      "duration": 45,
+      "priority": "high",
+      "personality": "coach",
+      "tags": [
+        "work",
+        "meetings"
+      ],
+      "createdAt": "2026-01-27T19:57:53.182Z",
+      "usedCount": 2
+    },
+    {
+      "id": "8db9bfc4-dfad-4ca2-ade3-7e4abc2059c6",
+      "name": "Draft client proposal for Q2 project",
+      "why": "This proposal could land a major deal. Give it your best shot.",
+      "coreWhy": "Clear proposals win clients and build trust.",
+      "doneMeans": [
+        "Email sent",
+        "Manager notified"
+      ],
+      "subtasks": [
+        {
+          "text": "Review client requirements and past communications (~10min)",
+          "cta": "Open folder",
+          "deliverable": "Notes ready",
+          "soWhat": "No surprises"
+        },
+        {
+          "text": "Outline scope, deliverables, and timeline (~15min)",
+          "cta": "Type first line",
+          "deliverable": "Draft saved",
+          "soWhat": "No blank page"
+        },
+        {
+          "text": "Write executive summary and value proposition (~30min)",
+          "cta": "Start writing",
+          "deliverable": "Draft proposal",
+          "soWhat": "Clear message"
+        },
+        {
+          "text": "Internal review for clarity and consistency (~15min)",
+          "cta": "Review draft",
+          "deliverable": "Revised draft",
+          "soWhat": "Fewer errors"
+        }
+      ],
+      "duration": 60,
+      "priority": "high",
+      "personality": "coach",
+      "tags": [
+        "work",
+        "sales"
+      ],
+      "createdAt": "2026-01-28T20:46:58.210Z",
+      "usedCount": 0
+    },
+    {
+      "id": "c3f584aa-a36e-49de-a862-c72b78ab42d4",
+      "name": "Process inbox to zero",
+      "why": "Clear inbox, clear mind. You've got this.",
+      "coreWhy": "Staying on top of email prevents surprises and builds reliability.",
+      "doneMeans": [
+        "Email sent",
+        "Manager notified",
+        "Inbox empty"
+      ],
+      "subtasks": [
+        {
+          "text": "Scan inbox and immediately delete or archive obvious FYIs and spam (~5min)",
+          "cta": "Delete",
+          "deliverable": "Inbox updated",
+          "soWhat": "No clutter"
+        },
+        {
+          "text": "Unsubscribe from non-essential newsletters while scanning (one pass only) (~10min)",
+          "cta": "Unsubscribe",
+          "deliverable": "Newsletters updated",
+          "soWhat": "Less noise"
+        },
+        {
+          "text": "Respond to genuinely quick emails (≤2 minutes) (~5min)",
+          "cta": "Respond",
+          "deliverable": "Emails replied",
+          "soWhat": "No delay"
+        },
+        {
+          "text": "Convert emails requiring action into tasks with clear next steps and due dates (~20min)",
+          "cta": "Convert",
+          "deliverable": "Tasks created",
+          "soWhat": "Clear plan"
+        },
+        {
+          "text": "Flag or move emails that need longer replies into a dedicated “Action / Reply later” folder (~5min)",
+          "cta": "Move",
+          "deliverable": "Folder updated",
+          "soWhat": "No distraction"
+        },
+        {
+          "text": "Review and prioritize urgent emails (~10min)"
+        }
+      ],
+      "duration": 30,
+      "priority": "medium",
+      "personality": "drill",
+      "tags": [
+        "work",
+        "email"
+      ],
+      "createdAt": "2026-01-28T23:00:10.494Z",
+      "usedCount": 0
+    }
+  ]
+}

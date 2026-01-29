@@ -1,8 +1,35 @@
+/**
+ * Validate Task Breakdown API Route
+ *
+ * Checks the quality of a task breakdown and suggests improvements.
+ * Uses AI when available, falls back to rule-based validation.
+ *
+ * Validation checks:
+ * - Sufficient number of steps (2+)
+ * - Steps are specific (not vague like "do stuff")
+ * - No duplicate steps
+ * - Steps are appropriately sized
+ *
+ * @route POST /api/validate
+ *
+ * Request body:
+ * - task: string - The task description
+ * - subtasks: string[] - Current subtask texts
+ * - duration: Duration - Current time estimate
+ *
+ * Response:
+ * - isValid: boolean - Whether breakdown passes validation
+ * - issues: string[] - List of problems found
+ * - suggestedSubtasks: string[] - Improved subtask list
+ * - suggestedDuration: Duration - Adjusted time estimate
+ * - summary: string - Brief validation result
+ * - source: "ollama" | "rules" - Which validator was used
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { Duration } from "../../lib/types";
-
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
+import { callOllama, extractJSON } from "../../lib/ollama";
+import { getValidatePrompt, getValidateSystemPrompt } from "../../lib/prompts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,71 +39,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Task and subtasks required" }, { status: 400 });
     }
 
-    const subtasksList = subtasks.map((st: string, i: number) => `${i + 1}. ${st}`).join("\n");
-
-    const prompt = `Analyze this task breakdown:
-
-Task: "${task}"
-Steps:
-${subtasksList}
-Estimated time: ${duration} minutes
-
-Check for:
-1. Overlapping or duplicate steps
-2. Steps that are too vague
-3. Missing critical steps
-4. Wrong order
-5. Time estimate accuracy
-
-Reply with ONLY a JSON object:
-{
-  "isValid": true/false,
-  "issues": ["list of problems found"],
-  "suggestedSubtasks": ["improved step 1", "improved step 2", ...],
-  "suggestedDuration": 15/30/45/60,
-  "summary": "one sentence summary"
-}
-
-If the breakdown is good, set isValid to true and keep suggestedSubtasks same as input.
-JSON response:`;
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.2,
-          num_predict: 500,
-        },
-      }),
+    const result = await callOllama(getValidatePrompt(task, subtasks, duration), {
+      system: getValidateSystemPrompt(),
+      temperature: 0.2,
+      num_predict: 500,
     });
 
-    if (!response.ok) {
-      // Fallback to rule-based validation
+    if (!result.ok) {
       return NextResponse.json(ruleBasedValidation(task, subtasks, duration));
     }
 
-    const data = await response.json();
-    const text = data.response || "";
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return NextResponse.json({
-          isValid: Boolean(parsed.isValid),
-          issues: Array.isArray(parsed.issues) ? parsed.issues : [],
-          suggestedSubtasks: Array.isArray(parsed.suggestedSubtasks) ? parsed.suggestedSubtasks : subtasks,
-          suggestedDuration: [15, 30, 45, 60].includes(parsed.suggestedDuration) ? parsed.suggestedDuration : duration,
-          summary: parsed.summary || "Validation complete",
-          source: "ollama",
-        });
-      } catch {
-        // Parse failed
-      }
+    const parsed = extractJSON(result.text);
+    if (parsed) {
+      return NextResponse.json({
+        isValid: Boolean(parsed.isValid),
+        issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+        suggestedSubtasks: Array.isArray(parsed.suggestedSubtasks) ? parsed.suggestedSubtasks : subtasks,
+        suggestedDuration: [15, 30, 45, 60].includes(parsed.suggestedDuration as number)
+          ? parsed.suggestedDuration
+          : duration,
+        summary: (parsed.summary as string) || "Validation complete",
+        source: "ollama",
+      });
     }
 
     return NextResponse.json(ruleBasedValidation(task, subtasks, duration));
@@ -86,15 +70,17 @@ JSON response:`;
   }
 }
 
+/**
+ * Fallback validation using simple rules when AI is unavailable.
+ * Checks for common issues like vague language and duplicates.
+ */
 function ruleBasedValidation(task: string, subtasks: string[], duration: Duration) {
   const issues: string[] = [];
 
-  // Check for too few steps
   if (subtasks.length < 2) {
     issues.push("Too few steps - consider breaking down further");
   }
 
-  // Check for vague steps
   const vagueWords = ["do", "handle", "work on", "deal with", "stuff"];
   subtasks.forEach((st, i) => {
     const lower = st.toLowerCase();
@@ -106,7 +92,6 @@ function ruleBasedValidation(task: string, subtasks: string[], duration: Duratio
     }
   });
 
-  // Check for duplicates
   const normalized = subtasks.map((s) => s.toLowerCase().trim());
   const uniqueCount = new Set(normalized).size;
   if (uniqueCount < subtasks.length) {

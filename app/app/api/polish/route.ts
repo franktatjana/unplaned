@@ -1,7 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
+/**
+ * Polish Text API Route
+ *
+ * Cleans up task text by fixing grammar, spelling, and formatting
+ * while preserving the original meaning. Uses AI with very low
+ * temperature for consistent, minimal changes.
+ *
+ * @route POST /api/polish
+ *
+ * Request body:
+ * - text: string - The text to polish
+ *
+ * Response:
+ * - polished: string - Cleaned up text
+ * - changed: boolean - Whether any changes were made
+ * - original: string - The original text (for comparison)
+ *
+ * Safety: Returns original text if AI makes drastic changes
+ * (>2x length increase or >50% length decrease)
+ */
 
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
+import { NextRequest, NextResponse } from "next/server";
+import { callOllama } from "../../lib/ollama";
+import { getPolishPrompt, getPolishSystemPrompt } from "../../lib/prompts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,38 +31,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ polished: text });
     }
 
-    // Skip if text is very short or already looks clean
+    // Skip if text is very short
     if (text.length < 5) {
       return NextResponse.json({ polished: text, changed: false });
     }
 
-    const prompt = `Fix any spelling and grammar errors in this task description. Keep it natural and concise. Only return the corrected text, nothing else. Do not add quotes or explanations.
-
-Original: "${text}"
-
-Corrected:`;
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.1,
-          num_predict: 100,
-        },
-      }),
+    const result = await callOllama(getPolishPrompt(text), {
+      system: getPolishSystemPrompt(),
+      temperature: 0.1,
+      num_predict: 100,
     });
 
-    if (!response.ok) {
+    if (!result.ok) {
       return NextResponse.json({ polished: text, changed: false });
     }
 
-    const data = await response.json();
-    let polished = (data.response || text).trim();
-
+    let polished = result.text.trim();
     // Remove surrounding quotes if present
     polished = polished.replace(/^["']|["']$/g, "").trim();
 

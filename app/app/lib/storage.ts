@@ -1,11 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { TaskStore, Task, Session } from "./types";
+import { TaskStore, Task, Session, Template, TemplateStore } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const TASKS_FILE = path.join(DATA_DIR, "tasks.json");
+const TEMPLATES_FILE = path.join(DATA_DIR, "templates.json");
 const EXAMPLE_FILE = path.join(DATA_DIR, "storage.example.json");
-const EXPORT_DIR = path.join(DATA_DIR, "export");
+const TEMPLATES_DIR = path.join(DATA_DIR, "templates");
 
 async function ensureDataDir() {
   try {
@@ -15,11 +16,11 @@ async function ensureDataDir() {
   }
 }
 
-async function ensureExportDir() {
+async function ensureTemplatesDir() {
   try {
-    await fs.access(EXPORT_DIR);
+    await fs.access(TEMPLATES_DIR);
   } catch {
-    await fs.mkdir(EXPORT_DIR, { recursive: true });
+    await fs.mkdir(TEMPLATES_DIR, { recursive: true });
   }
 }
 
@@ -85,9 +86,9 @@ function sanitizeFilename(text: string): string {
 }
 
 async function saveTaskAsMarkdown(task: Task): Promise<void> {
-  await ensureExportDir();
+  await ensureTemplatesDir();
   const filename = `${sanitizeFilename(task.text)}-${task.id.slice(0, 8)}.md`;
-  const filepath = path.join(EXPORT_DIR, filename);
+  const filepath = path.join(TEMPLATES_DIR, filename);
   const markdown = taskToMarkdown(task);
   await fs.writeFile(filepath, markdown, "utf-8");
 }
@@ -95,7 +96,7 @@ async function saveTaskAsMarkdown(task: Task): Promise<void> {
 async function deleteTaskMarkdown(task: Task): Promise<void> {
   try {
     const filename = `${sanitizeFilename(task.text)}-${task.id.slice(0, 8)}.md`;
-    const filepath = path.join(EXPORT_DIR, filename);
+    const filepath = path.join(TEMPLATES_DIR, filename);
     await fs.unlink(filepath);
   } catch {
     // File might not exist, ignore
@@ -188,24 +189,23 @@ export async function updateSession(id: string, updates: Partial<Session>): Prom
 // Check if using sample/example data (has sample IDs)
 export async function isUsingSampleData(): Promise<boolean> {
   const store = await readStore();
-  const sampleIds = ["sample-001", "sample-002", "sample-003"];
-  return store.tasks.some((t) => sampleIds.includes(t.id));
+  return store.tasks.some((t) => t.id.startsWith("sample-"));
 }
 
 // Clear all data (start fresh)
 export async function clearAllData(): Promise<void> {
   const emptyStore: TaskStore = { tasks: [], sessions: [] };
   await writeStore(emptyStore);
-  // Also clear export directory
+  // Also clear markdown files in templates directory
   try {
-    const files = await fs.readdir(EXPORT_DIR);
+    const files = await fs.readdir(TEMPLATES_DIR);
     for (const file of files) {
       if (file.endsWith(".md")) {
-        await fs.unlink(path.join(EXPORT_DIR, file));
+        await fs.unlink(path.join(TEMPLATES_DIR, file));
       }
     }
   } catch {
-    // Export dir might not exist
+    // Templates dir might not exist
   }
 }
 
@@ -218,5 +218,65 @@ export async function loadSampleData(): Promise<void> {
   } catch {
     // Example file doesn't exist or is invalid
     console.error("Failed to load sample data");
+  }
+}
+
+// Template storage functions
+async function readTemplateStore(): Promise<TemplateStore> {
+  await ensureDataDir();
+  try {
+    const data = await fs.readFile(TEMPLATES_FILE, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    return { templates: [] };
+  }
+}
+
+async function writeTemplateStore(store: TemplateStore): Promise<void> {
+  await ensureDataDir();
+  await fs.writeFile(TEMPLATES_FILE, JSON.stringify(store, null, 2));
+}
+
+export async function getTemplates(): Promise<Template[]> {
+  const store = await readTemplateStore();
+  return store.templates;
+}
+
+export async function getTemplate(id: string): Promise<Template | undefined> {
+  const store = await readTemplateStore();
+  return store.templates.find((t) => t.id === id);
+}
+
+export async function createTemplate(template: Template): Promise<Template> {
+  const store = await readTemplateStore();
+  store.templates.push(template);
+  await writeTemplateStore(store);
+  return template;
+}
+
+export async function updateTemplate(id: string, updates: Partial<Template>): Promise<Template | undefined> {
+  const store = await readTemplateStore();
+  const index = store.templates.findIndex((t) => t.id === id);
+  if (index === -1) return undefined;
+  store.templates[index] = { ...store.templates[index], ...updates };
+  await writeTemplateStore(store);
+  return store.templates[index];
+}
+
+export async function deleteTemplate(id: string): Promise<boolean> {
+  const store = await readTemplateStore();
+  const index = store.templates.findIndex((t) => t.id === id);
+  if (index === -1) return false;
+  store.templates.splice(index, 1);
+  await writeTemplateStore(store);
+  return true;
+}
+
+export async function incrementTemplateUsage(id: string): Promise<void> {
+  const store = await readTemplateStore();
+  const template = store.templates.find((t) => t.id === id);
+  if (template) {
+    template.usedCount += 1;
+    await writeTemplateStore(store);
   }
 }

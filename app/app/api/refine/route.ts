@@ -1,8 +1,33 @@
+/**
+ * Refine/2nd Opinion API Route
+ *
+ * Merges external AI suggestions (from ChatGPT, Claude, etc.) with
+ * the existing task breakdown. The local LLM intelligently combines
+ * the original steps with the external suggestions.
+ *
+ * Use case: User copies task to external AI, gets suggestions, pastes
+ * them back. This route processes and normalizes those suggestions.
+ *
+ * @route POST /api/refine
+ *
+ * Request body:
+ * - originalTask: string - The task description
+ * - originalSubtasks: string[] - Current subtask texts
+ * - externalResponse: string - Raw text from external AI
+ * - currentDuration: Duration - Current time estimate
+ *
+ * Response:
+ * - subtasks: Array<{text, cta?, deliverable?, soWhat?}> - Refined steps
+ * - doneMeans: string[] - Completion criteria
+ * - duration: Duration - Updated time estimate
+ * - reasoning: string - Explanation of changes made
+ * - source: "ai" | "simple" - Whether AI or fallback was used
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { Duration } from "../../lib/types";
-
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "llama3";
+import { callOllama, tryParseJSON } from "../../lib/ollama";
+import { buildRefinePrompt } from "../../lib/prompts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,82 +40,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `You are a task breakdown expert. Your job is to INCORPORATE valuable suggestions from an external AI into the current task breakdown.
+    const prompt = buildRefinePrompt(originalTask, originalSubtasks || [], externalResponse, currentDuration || 15);
+    const result = await callOllama(prompt, { temperature: 0.3, num_predict: 1500 });
 
-ORIGINAL TASK: "${originalTask}"
-
-CURRENT STEPS:
-${(originalSubtasks || []).map((st: string, i: number) => `${i + 1}. ${st}`).join("\n") || "(none)"}
-
-CURRENT TIME ESTIMATE: ${currentDuration || 15} minutes
-
-EXTERNAL AI SUGGESTIONS:
-${externalResponse}
-
-YOUR JOB:
-1. PRIORITIZE adding new valuable steps from the external AI that are missing
-2. Keep good steps from the original breakdown
-3. Merge similar steps if they overlap
-4. Remove only truly redundant steps
-5. Output ALL necessary steps (3-7 steps typical, but use as many as needed)
-6. Start each step with an action verb
-7. Adjust time estimate based on total work
-
-IMPORTANT: Don't over-simplify. If the external AI identified important additional steps, INCLUDE them.
-
-Reply with ONLY a JSON object:
-{
-  "subtasks": ["step 1", "step 2", ...],
-  "duration": 15,
-  "reasoning": "brief explanation: what was added/changed"
-}
-
-Duration must be 15, 30, 45, or 60 minutes.
-JSON response:`;
-
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.3,
-          num_predict: 500,
-        },
-      }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!response.ok) {
+    if (!result.ok) {
       // Fall back to simple extraction
       return NextResponse.json(simpleExtract(externalResponse, currentDuration));
     }
 
-    const data = await response.json();
-    const text = data.response || "";
-
     // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonMatch = result.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
+      const parsed = tryParseJSON(jsonMatch[0]) as Record<string, unknown> | null;
 
-        const subtasks = Array.isArray(parsed.subtasks) && parsed.subtasks.length > 0
-          ? parsed.subtasks.filter((s: unknown) => typeof s === "string" && s.trim()).slice(0, 10)
-          : null;
+      if (parsed) {
+        // Handle subtasks - can be objects or strings
+        let subtasks: Array<{ text: string; cta?: string; deliverable?: string; soWhat?: string }> = [];
 
-        if (subtasks && subtasks.length > 0) {
+        if (Array.isArray(parsed.subtasks) && parsed.subtasks.length > 0) {
+          subtasks = (parsed.subtasks as unknown[]).slice(0, 10).map((s: unknown) => {
+            if (typeof s === "string" && s.trim()) {
+              return { text: s.trim() };
+            }
+            if (typeof s === "object" && s !== null && "text" in s) {
+              const obj = s as { text: string; cta?: string; deliverable?: string; soWhat?: string };
+              return {
+                text: obj.text,
+                ...(obj.cta && { cta: obj.cta }),
+                ...(obj.deliverable && { deliverable: obj.deliverable }),
+                ...(obj.soWhat && { soWhat: obj.soWhat }),
+              };
+            }
+            return null;
+          }).filter(Boolean) as Array<{ text: string; cta?: string; deliverable?: string; soWhat?: string }>;
+        }
+
+        if (subtasks.length > 0) {
           return NextResponse.json({
             subtasks,
-            duration: [15, 30, 45, 60].includes(parsed.duration) ? parsed.duration : currentDuration || 15,
-            reasoning: parsed.reasoning || "Applied and refined suggestions",
+            doneMeans: Array.isArray(parsed.doneMeans)
+              ? (parsed.doneMeans as unknown[]).filter((d: unknown) => typeof d === "string")
+              : [],
+            duration: [15, 30, 45, 60].includes(parsed.duration as number)
+              ? parsed.duration
+              : currentDuration || 15,
+            reasoning: (parsed.reasoning as string) || "Applied and refined suggestions",
             source: "ai",
           });
         }
-      } catch {
-        // Parse failed, fall back
       }
     }
 
@@ -105,6 +102,10 @@ JSON response:`;
   }
 }
 
+/**
+ * Fallback extraction when AI is unavailable.
+ * Uses regex to find numbered steps and time estimates.
+ */
 function simpleExtract(text: string, currentDuration: Duration): {
   subtasks: string[];
   duration: Duration;
@@ -116,7 +117,7 @@ function simpleExtract(text: string, currentDuration: Duration): {
   let extractedDuration: Duration = currentDuration || 15;
 
   for (const line of lines) {
-    const stepMatch = line.match(/^\d+[\.\)]\s*(.+)/);
+    const stepMatch = line.match(/^\d+[\.)\]]\s*(.+)/);
     if (stepMatch && stepMatch[1].trim()) {
       const stepText = stepMatch[1].trim();
       // Skip header lines

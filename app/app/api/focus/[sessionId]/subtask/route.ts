@@ -1,3 +1,26 @@
+/**
+ * Focus Subtask Update API Route
+ *
+ * Marks a subtask as complete or incomplete during a focus session.
+ * Updates both the task (for persistence) and the session (for tracking).
+ *
+ * @route POST /api/focus/[sessionId]/subtask
+ *
+ * URL params:
+ * - sessionId: string - The focus session ID
+ *
+ * Request body:
+ * - subtaskId: string - The subtask to update
+ * - completed: boolean - New completion status
+ *
+ * Response:
+ * - success: boolean
+ *
+ * Side effects:
+ * - Updates subtask.completed in the task
+ * - Adds/removes subtaskId from session.completedSubtasks
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, getTask, updateTask, updateSession } from "../../../../lib/storage";
 
@@ -35,7 +58,7 @@ export async function POST(
 
     // Update session's completedSubtasks list
     const completedSubtasks = completed
-      ? [...new Set([...session.completedSubtasks, subtaskId])]
+      ? Array.from(new Set([...session.completedSubtasks, subtaskId]))
       : session.completedSubtasks.filter((id) => id !== subtaskId);
 
     await updateSession(sessionId, { completedSubtasks });

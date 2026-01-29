@@ -44,9 +44,12 @@ You check off subtasks as you go. When time's up, you get a simple summary: what
 - **Timer**: 15–60 min countdown with visual progress
 - **Why reminder**: your purpose stays visible to keep you anchored
 - **Progress tracking**: see time estimates vs actual time per subtask
-- **Overview**: Kanban-style board (Backlog / In Progress / Done)
+- **Task Kanban**: three-column board (Backlog / In Progress / Done)
+- **Template Library**: save and reuse task breakdowns
+- **Step details**: CTA (what to do first), Deliverable (proof of done), SoWhat (pain avoided)
+- **Definition of done**: track ripple effects beyond core task (notify, log, follow-up)
 - **Motivation personalities**: choose your style - Stoic, Coach, Drill, or Friend
-- **AI second opinion**: get anonymized external feedback (works offline too)
+- **AI analysis**: enrich steps with CTAs, deliverables, and completion criteria
 - **Sample data**: try the app with pre-loaded example tasks
 
 ## The Mantra
@@ -84,8 +87,9 @@ unplaned/
 ├── LICENSE
 └── app/                # Next.js 14 application
     ├── app/
-    │   ├── page.tsx        # Home (task list)
-    │   ├── overview/       # Kanban view
+    │   ├── page.tsx        # Home (task input + list)
+    │   ├── overview/       # Task Kanban (3-column board)
+    │   ├── templates/      # Template Library
     │   ├── focus/          # Focus session
     │   ├── help/           # How to use
     │   ├── api/            # API routes

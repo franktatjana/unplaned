@@ -1,3 +1,23 @@
+/**
+ * Focus Session Data API Route
+ *
+ * Retrieves the session and associated task data needed to render
+ * the focus mode page. Combines both resources in a single request
+ * to reduce client-side round trips.
+ *
+ * @route GET /api/focus/[sessionId]
+ *
+ * URL params:
+ * - sessionId: string - The focus session ID
+ *
+ * Response:
+ * - session: Session - The focus session object
+ * - task: Task - The full task with subtasks
+ *
+ * Errors:
+ * - 404 if session or task not found
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, getTask } from "../../../lib/storage";
 

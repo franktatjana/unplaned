@@ -1,5 +1,31 @@
+/**
+ * Anonymize API Route
+ *
+ * Removes personally identifiable information (PII) from task text
+ * using AI. Useful when users want to share tasks without exposing
+ * private details like names, emails, phone numbers, etc.
+ *
+ * @route POST /api/anonymize
+ *
+ * Request body:
+ * - text: string - The text to anonymize
+ *
+ * Response:
+ * - anonymized: string - Text with PII replaced by placeholders
+ * - wasAnonymized: boolean - Whether any changes were made
+ * - original: string - The original text (for comparison)
+ *
+ * Placeholder format:
+ * - [PERSON] for names
+ * - [COMPANY] for company/brand names
+ * - [LOCATION] for addresses/places
+ * - [PHONE] for phone numbers
+ * - [EMAIL] for email addresses
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 
+// Configuration from environment or defaults
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const MODEL = process.env.OLLAMA_MODEL || "llama3";
 

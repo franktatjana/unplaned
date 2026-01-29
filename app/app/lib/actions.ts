@@ -1,7 +1,7 @@
 "use server";
 
 import { v4 as uuid } from "uuid";
-import { Task, Subtask, Personality, Duration, TaskNote } from "./types";
+import { Task, Subtask, Personality, Duration, TaskNote, Template } from "./types";
 import {
   createTask,
   updateTask,
@@ -11,24 +11,41 @@ import {
   isUsingSampleData,
   clearAllData,
   loadSampleData,
+  getTemplates,
+  getTemplate,
+  createTemplate,
+  deleteTemplate as deleteTemplateFromStore,
+  incrementTemplateUsage,
 } from "./storage";
+
+interface SubtaskInput {
+  text: string;
+  cta?: string;
+  deliverable?: string;
+  soWhat?: string;
+}
 
 export async function addTask(
   text: string,
-  subtasks: string[],
+  subtasks: string[] | SubtaskInput[],
   why: string,
   coreWhy: string,
   duration: Duration,
-  personality: Personality
+  personality: Personality,
+  doneMeans?: string[]
 ): Promise<Task> {
   const task: Task = {
     id: uuid(),
     text,
     why,
     coreWhy,
+    doneMeans: doneMeans || [],
     subtasks: subtasks.map((st) => ({
       id: uuid(),
-      text: st,
+      text: typeof st === "string" ? st : st.text,
+      cta: typeof st === "string" ? undefined : st.cta,
+      deliverable: typeof st === "string" ? undefined : st.deliverable,
+      soWhat: typeof st === "string" ? undefined : st.soWhat,
       completed: false,
     })),
     duration,
@@ -181,4 +198,72 @@ export async function clearSampleData(): Promise<void> {
 
 export async function generateSampleData(): Promise<void> {
   await loadSampleData();
+}
+
+// Template actions
+export async function saveAsTemplate(taskId: string): Promise<Template | undefined> {
+  const task = await getTask(taskId);
+  if (!task) return undefined;
+
+  const template: Template = {
+    id: uuid(),
+    name: task.text,
+    why: task.why,
+    coreWhy: task.coreWhy,
+    doneMeans: task.doneMeans,
+    subtasks: task.subtasks.map((st) => ({
+      text: st.text,
+      cta: st.cta,
+      deliverable: st.deliverable,
+      soWhat: st.soWhat,
+    })),
+    duration: task.duration,
+    priority: task.priority,
+    personality: task.personality,
+    tags: task.tags,
+    createdAt: new Date().toISOString(),
+    usedCount: 0,
+  };
+
+  return createTemplate(template);
+}
+
+export async function fetchTemplates(): Promise<Template[]> {
+  return getTemplates();
+}
+
+export async function removeTemplate(id: string): Promise<boolean> {
+  return deleteTemplateFromStore(id);
+}
+
+export async function createTaskFromTemplate(templateId: string): Promise<Task | undefined> {
+  const template = await getTemplate(templateId);
+  if (!template) return undefined;
+
+  // Increment usage count
+  await incrementTemplateUsage(templateId);
+
+  const task: Task = {
+    id: uuid(),
+    text: template.name,
+    why: template.why,
+    coreWhy: template.coreWhy,
+    doneMeans: template.doneMeans,
+    subtasks: template.subtasks.map((st) => ({
+      id: uuid(),
+      text: st.text,
+      cta: st.cta,
+      deliverable: st.deliverable,
+      soWhat: st.soWhat,
+      completed: false,
+    })),
+    duration: template.duration,
+    priority: template.priority,
+    personality: template.personality,
+    tags: template.tags,
+    notes: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  return createTask(task);
 }
