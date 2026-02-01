@@ -17,13 +17,36 @@ Most task apps encourage you to plan endlessly. Unplaned takes a different appro
 
 Enter a task description and let AI break it down into actionable steps with time estimates.
 
-```
+```text
 "Prepare quarterly report" →
   1. Gather data from dashboard (~10min)
   2. Create summary charts (~15min)
   3. Write executive summary (~20min)
   4. Send to stakeholders (~5min)
 ```
+
+### Brain Dump
+
+Bulk add tasks from a brain dump or existing todo list:
+
+1. Click "Brain Dump" (yellow button on home page)
+2. Paste your raw todo list (example below)
+3. AI parses and cleans up each task
+4. Preview with suggested durations and tags
+5. Edit titles/durations as needed
+6. Click "Create N Tasks" - each gets full AI breakdown
+
+Example input:
+
+```text
+* Write blog post about frameworks
+* Email contractor about window replacement
+* Plan next week based on calendar
+* Read for 30 minutes
+* Learn about AI agents - watch YouTube videos
+```
+
+Works with bullets (`*`, `-`), numbered lists, or plain text. Falls back to simple parsing if AI is unavailable.
 
 ### Focus Mode
 
@@ -71,7 +94,8 @@ Track your accomplishments for performance reviews:
 - AI-generated value statements for each completed task
 - Executive-ready language focused on organizational impact
 - STAR method grouping (Situation, Task, Action, Result)
-- Copy-ready achievement bullets
+- Edit, delete, and regenerate entries
+- Export to markdown file for sharing
 - Groups similar tasks into single entries
 
 ### Task Kanban

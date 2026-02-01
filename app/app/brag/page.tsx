@@ -7,7 +7,6 @@ import { Task } from "../lib/types";
 interface BragEntry {
   title: string;
   bullet: string;
-  metrics: string;
   category: string;
   tags?: string[];
   overallImpact?: string;
@@ -34,8 +33,7 @@ export default function BragPage() {
   const [generating, setGenerating] = useState(false);
   const [bragData, setBragData] = useState<BragData | null>(null);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
   const [acceptedIndices, setAcceptedIndices] = useState<Set<number>>(new Set());
   const [accepting, setAccepting] = useState<number | null>(null);
   const [savedBrags, setSavedBrags] = useState<string>("");
@@ -44,7 +42,7 @@ export default function BragPage() {
   const [deletingSavedTitle, setDeletingSavedTitle] = useState<string | null>(null);
   const [confirmDeleteSaved, setConfirmDeleteSaved] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<{ title: string; bullet: string; metrics: string } | null>(null);
+  const [editForm, setEditForm] = useState<{ title: string; bullet: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Load completed tasks, saved brags, and generated brag data
@@ -109,39 +107,19 @@ export default function BragPage() {
     }
   }, [completedTasks]);
 
-  const copyAllToClipboard = async () => {
-    if (!bragData) return;
+  const exportSavedBrags = () => {
+    if (!savedBrags) return;
 
-    const text = formatBragListForCopy(bragData);
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const copyEntryToClipboard = async (entry: BragEntry) => {
-    const text = `${entry.bullet}\n   Metrics: ${entry.metrics}`;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-    }
+    const text = formatSavedBragsForExport(savedBrags);
+    const blob = new Blob([text], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `accomplishments-${new Date().toISOString().split("T")[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const acceptEntry = async (entry: BragEntry, index: number) => {
@@ -228,7 +206,6 @@ export default function BragPage() {
     setEditForm({
       title: entry.title,
       bullet: entry.bullet,
-      metrics: entry.metrics,
     });
   };
 
@@ -246,7 +223,6 @@ export default function BragPage() {
         ...bragData.entries[editingIndex],
         title: editForm.title,
         bullet: editForm.bullet,
-        metrics: editForm.metrics,
       };
 
       const res = await fetch("/api/brag", {
@@ -292,9 +268,9 @@ export default function BragPage() {
         </button>
         <h1 style={styles.title}>Brag List</h1>
         <div style={styles.headerActions}>
-          {bragData && (
-            <button onClick={copyAllToClipboard} style={styles.copyAllBtn}>
-              {copied ? "Copied!" : "Copy All"}
+          {savedBrags && (
+            <button onClick={exportSavedBrags} style={styles.exportBtn}>
+              Export
             </button>
           )}
         </div>
@@ -464,15 +440,6 @@ export default function BragPage() {
                         rows={3}
                       />
                     </label>
-                    <label style={styles.editLabel}>
-                      Metrics
-                      <input
-                        type="text"
-                        value={editForm.metrics}
-                        onChange={(e) => setEditForm({ ...editForm, metrics: e.target.value })}
-                        style={styles.editInput}
-                      />
-                    </label>
                     <div style={styles.editActions}>
                       <button
                         onClick={saveEdit}
@@ -496,7 +463,6 @@ export default function BragPage() {
                     {entry.overallImpact && (
                       <p style={styles.entryImpact}><strong>Impact:</strong> {entry.overallImpact}</p>
                     )}
-                    <p style={styles.entryMetrics}>{entry.metrics}</p>
                   </>
                 )}
               </div>
@@ -522,7 +488,6 @@ export default function BragPage() {
               const lines = entry.trim().split("\n");
               const title = lines[0] || "";
               const bullet = lines.find(l => l.startsWith("> "))?.slice(2) || "";
-              const metrics = lines.find(l => l.startsWith("*Metrics:*"))?.slice(10) || "";
 
               // Parse tags from **Tags:** line
               const tagsLine = lines.find(l => l.startsWith("**Tags:**"));
@@ -606,7 +571,6 @@ export default function BragPage() {
                   {overallImpact && (
                     <p style={styles.savedImpact}><strong>Overall Impact:</strong> {overallImpact}</p>
                   )}
-                  {metrics && <p style={styles.savedMetrics}>{metrics}</p>}
                 </div>
               );
             })}
@@ -617,23 +581,39 @@ export default function BragPage() {
   );
 }
 
-function formatBragListForCopy(data: BragData): string {
+function formatSavedBragsForExport(savedBrags: string): string {
   const lines = [
-    "ACCOMPLISHMENTS",
-    "===============",
+    "# Accomplishments",
     "",
   ];
 
-  for (const entry of data.entries) {
-    lines.push(`[${entry.category}] ${entry.title}`);
-    lines.push(`  ${entry.bullet}`);
-    lines.push(`  Metrics: ${entry.metrics}`);
+  const entries = savedBrags.split(/^## /m).filter(Boolean).slice(1);
+
+  for (const entry of entries) {
+    const entryLines = entry.trim().split("\n");
+    const title = entryLines[0] || "";
+    const bullet = entryLines.find(l => l.startsWith("> "))?.slice(2) || "";
+    const tagsLine = entryLines.find(l => l.startsWith("**Tags:**"));
+    const tags = tagsLine
+      ? tagsLine.replace("**Tags:**", "").split("|")[0].trim()
+      : "";
+    const impactLine = entryLines.find(l => l.startsWith("**Overall Impact:**"));
+    const impact = impactLine
+      ? impactLine.replace("**Overall Impact:**", "").trim()
+      : "";
+
+    lines.push(`## ${title}`);
+    if (tags) lines.push(`**${tags}**`);
+    lines.push("");
+    lines.push(`> ${bullet}`);
+    if (impact) {
+      lines.push("");
+      lines.push(`*Impact:* ${impact}`);
+    }
+    lines.push("");
+    lines.push("---");
     lines.push("");
   }
-
-  lines.push("---");
-  lines.push(`Summary: ${data.summary.overallImpact}`);
-  lines.push(`Total time invested: ${data.summary.totalTimeInvested}`);
 
   return lines.join("\n");
 }
@@ -678,7 +658,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     gap: "0.5rem",
   },
-  copyAllBtn: {
+  exportBtn: {
     padding: "0.5rem 1rem",
     fontSize: "0.85rem",
     background: "#28a745",
@@ -818,16 +798,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: "var(--fg-muted)",
     borderRadius: "10px",
   },
-  copyEntryBtn: {
-    marginLeft: "auto",
-    padding: "0.25rem 0.5rem",
-    fontSize: "0.7rem",
-    background: "none",
-    border: "1px solid var(--border)",
-    borderRadius: "4px",
-    color: "var(--fg-muted)",
-    cursor: "pointer",
-  },
   acceptBtn: {
     padding: "0.25rem 0.5rem",
     fontSize: "0.7rem",
@@ -950,12 +920,6 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(40, 167, 69, 0.08)",
     borderRadius: "4px",
     borderLeft: "3px solid #28a745",
-  },
-  entryMetrics: {
-    margin: 0,
-    fontSize: "0.75rem",
-    color: "var(--fg-muted)",
-    fontStyle: "italic",
   },
   summaryCard: {
     padding: "1rem",
@@ -1104,10 +1068,4 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "4px",
     borderLeft: "3px solid #28a745",
   },
-  savedMetrics: {
-    margin: "0 0 0.25rem 0",
-    fontSize: "0.75rem",
-    color: "var(--fg-muted)",
-    fontStyle: "italic",
-  },
-};
+  };

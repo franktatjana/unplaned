@@ -123,6 +123,23 @@ export default function HelpPage() {
         </div>
 
         <div style={styles.feature}>
+          <h3 style={styles.featureTitle}>Brain Dump</h3>
+          <p style={styles.featureDesc}>
+            Quickly add multiple tasks from a brain dump, todo list, or notes:
+          </p>
+          <ul style={styles.list}>
+            <li><strong>Click &quot;Brain Dump&quot;</strong> on the home page</li>
+            <li><strong>Paste your todos</strong> - bullets, numbered lists, or plain text</li>
+            <li><strong>Click &quot;Parse Tasks&quot;</strong> - AI identifies tasks, fixes typos, suggests durations</li>
+            <li><strong>Review &amp; edit</strong> - adjust titles, durations, uncheck tasks to skip</li>
+            <li><strong>Click &quot;Create N Tasks&quot;</strong> - each task gets full AI breakdown</li>
+          </ul>
+          <p style={{...styles.featureDesc, marginTop: "0.75rem"}}>
+            Works offline too - if AI is unavailable, tasks are parsed line by line with default settings.
+          </p>
+        </div>
+
+        <div style={styles.feature}>
           <h3 style={styles.featureTitle}>Focus Sessions</h3>
           <p style={styles.featureDesc}>
             Press the play button to start a focus session. You&apos;ll see:

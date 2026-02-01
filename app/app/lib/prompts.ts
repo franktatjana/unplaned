@@ -688,3 +688,45 @@ export function getValueStatementSystemPrompt(): string {
   const prompts = loadPrompts();
   return prompts.valueStatement.system;
 }
+
+// ============================================
+// Todo List Parsing
+// ============================================
+
+/**
+ * Builds a prompt for parsing a raw todo list into structured tasks.
+ * Used by the import feature to convert brain dumps into actionable tasks.
+ *
+ * @param rawText - Raw todo list text (brain dump)
+ * @returns Formatted prompt for AI parsing
+ */
+export function buildParseTodosPrompt(rawText: string): string {
+  return `You are a task parser. Parse this raw todo list into structured tasks.
+
+RAW TODO LIST:
+${rawText}
+
+For each task:
+1. Clean up the title: fix typos, make it action-oriented (start with verb)
+2. Estimate duration: 15 (quick), 30 (medium), 45 (substantial), or 60 (complex) minutes
+3. Suggest 1-2 tags from: PLANNING, WRITING, EMAIL, ADMIN, LEARNING, READING, RESEARCH, CODING, MEETING
+
+Rules:
+- Each line/bullet is usually one task
+- If time is mentioned ("20 minutes", "one hour"), use that for duration
+- Keep titles concise but clear (max 60 chars)
+- Reading tasks: use mentioned time or default to 30min
+- Learning tasks: default to 45min unless time specified
+
+Return JSON only:
+{
+  "tasks": [
+    {
+      "title": "Write LinkedIn blog about EPOS frameworks",
+      "suggestedDuration": 45,
+      "suggestedTags": ["WRITING", "PLANNING"],
+      "originalLine": "Linkedin blog plan EPOS, Frameworks"
+    }
+  ]
+}`;
+}

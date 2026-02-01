@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getTasks, getSessions } from "./lib/storage";
 import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
+import NavSection from "./components/NavSection";
 
 export const dynamic = "force-dynamic";
 
@@ -20,20 +20,7 @@ export default async function Home() {
 
       <section style={styles.content}>
         <TaskInput />
-        <nav style={styles.nav}>
-          <Link href="/overview" style={styles.navLink}>
-            Kanban
-          </Link>
-          <Link href="/templates" style={styles.navLink}>
-            Templates
-          </Link>
-          <Link href="/brag" style={styles.navLinkBrag}>
-            Brag List
-          </Link>
-          <Link href="/help" style={styles.navLinkHelp}>
-            ?
-          </Link>
-        </nav>
+        <NavSection />
         <TaskList tasks={tasks} activeSessions={activeSessions} />
       </section>
     </main>
@@ -60,44 +47,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "1rem",
     color: "var(--fg-muted)",
     margin: "0.25rem 0 0 0",
-  },
-  nav: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "0.5rem",
-    marginTop: "0.75rem",
-  },
-  navLink: {
-    fontSize: "0.8rem",
-    color: "var(--fg-primary)",
-    textDecoration: "none",
-    padding: "0.5rem 1rem",
-    background: "var(--bg-primary)",
-    border: "1px solid var(--border)",
-    borderRadius: "6px",
-    transition: "opacity 0.15s",
-    fontWeight: 500,
-  },
-  navLinkBrag: {
-    fontSize: "0.8rem",
-    color: "#28a745",
-    textDecoration: "none",
-    padding: "0.5rem 1rem",
-    background: "rgba(40, 167, 69, 0.1)",
-    border: "1px solid rgba(40, 167, 69, 0.3)",
-    borderRadius: "6px",
-    transition: "opacity 0.15s",
-    fontWeight: 500,
-  },
-  navLinkHelp: {
-    fontSize: "0.8rem",
-    color: "var(--fg-muted)",
-    textDecoration: "none",
-    padding: "0.5rem 0.625rem",
-    background: "transparent",
-    border: "1px solid var(--border)",
-    borderRadius: "6px",
-    transition: "opacity 0.15s",
   },
   content: {
     display: "flex",
