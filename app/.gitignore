@@ -37,8 +37,13 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# User data (personal tasks)
+# User data (personal tasks, brags, templates)
 data/tasks.json
+data/sessions.json
+data/brag-list.md
+data/brag-generated.json
+data/templates.json
+data/templates/
 
 # Internal documentation (private)
 docs/
